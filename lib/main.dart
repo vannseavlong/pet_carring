@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'di/app_binding.dart';
 import 'presentation/theme/app_theme.dart';
-import 'presentation/views/home/home_screen.dart';
+import 'presentation/views/app/app_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       title: 'Pet Boarding Manager',
       theme: AppTheme.light,
       initialBinding: AppBinding(),
-      home: const HomeScreen(),
+      home: const AppScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

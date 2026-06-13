@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:pet_carrying_app/presentation/controllers/navigation_controller.dart';
 import '../core/network/api_client.dart';
 import '../data/datasources/local/booking_local_datasource.dart';
 import '../data/datasources/remote/booking_remote_datasource.dart';
@@ -33,6 +34,9 @@ class AppBinding extends Bindings {
     // Use cases
     Get.lazyPut(() => GetBookingsUseCase(Get.find()), fenix: true);
     Get.lazyPut(() => AddBookingUseCase(Get.find()), fenix: true);
+
+    // Navigation
+    Get.lazyPut(() => NavigationController(), fenix: true);
 
     // Controllers
     Get.lazyPut(() => BookingController(Get.find(), Get.find()), fenix: true);

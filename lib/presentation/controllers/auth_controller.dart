@@ -1,0 +1,85 @@
+import 'package:dio/dio.dart';
+import 'package:get/get.dart';
+import '../../domain/entities/user.dart';
+import '../../domain/usecases/get_current_user_usecase.dart';
+import '../../domain/usecases/login_usecase.dart';
+import '../../domain/usecases/logout_usecase.dart';
+import '../../domain/usecases/register_usecase.dart';
+
+class AuthController extends GetxController {
+  final GetCurrentUserUseCase _getCurrentUser;
+  final LoginUseCase _login;
+  final RegisterUseCase _register;
+  final LogoutUseCase _logout;
+
+  AuthController(
+    this._getCurrentUser,
+    this._login,
+    this._register,
+    this._logout,
+  );
+
+  final isChecking = true.obs;
+  final isLoggedIn = false.obs;
+  final isLoading = false.obs;
+  final Rx<User?> currentUser = Rx<User?>(null);
+  final errorMessage = ''.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    final user = await _getCurrentUser();
+    currentUser.value = user;
+    isLoggedIn.value = user != null;
+    isChecking.value = false;
+  }
+
+  Future<void> login({required String email, required String password}) async {
+    errorMessage.value = '';
+    isLoading.value = true;
+    try {
+      final user = await _login(email: email, password: password);
+      currentUser.value = user;
+      isLoggedIn.value = true;
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      errorMessage.value =
+          (data is Map ? data['error'] as String? : null) ?? 'Login failed';
+      rethrow;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> register({
+    required String fullName,
+    required String email,
+    required String password,
+  }) async {
+    errorMessage.value = '';
+    isLoading.value = true;
+    try {
+      final user =
+          await _register(fullName: fullName, email: email, password: password);
+      currentUser.value = user;
+      isLoggedIn.value = true;
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      errorMessage.value =
+          (data is Map ? data['error'] as String? : null) ?? 'Registration failed';
+      rethrow;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> logout() async {
+    await _logout();
+    currentUser.value = null;
+    isLoggedIn.value = false;
+  }
+}

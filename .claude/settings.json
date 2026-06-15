@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p /Users/suntel/work/pet_carrying_app/.vscode)"
+    ],
+    "additionalDirectories": [
+      "/Users/suntel/work/pet_carrying_app"
+    ]
+  }
+}

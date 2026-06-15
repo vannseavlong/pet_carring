@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import '../../controllers/booking_controller.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
-import '../../theme/app_typography.dart';
 import 'home_header.dart';
+import 'services_section.dart';
 import 'status_card.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -30,6 +30,8 @@ class HomeScreen extends StatelessWidget {
                 const HomeHeader(),
                 const SizedBox(height: AppSpacing.md),
                 const StatusCard(),
+                const SizedBox(height: AppSpacing.lg),
+                const ServicesSection(),
               ],
             ),
           );

@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'core/config/app_config.dart';
 import 'di/app_binding.dart';
 import 'presentation/theme/app_theme.dart';
-import 'presentation/views/app/app_screen.dart';
+import 'presentation/views/auth/auth_wrapper.dart';
 
 void main() {
+  AppConfig.setup(AppConfig.dev());
+  bootstrap();
+}
+
+void bootstrap() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -14,11 +21,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Pet Boarding Manager',
+      title: AppConfig.instance.appName,
       theme: AppTheme.light,
       initialBinding: AppBinding(),
-      home: const AppScreen(),
-      debugShowCheckedModeBanner: false,
+      home: const AuthWrapper(),
+      debugShowCheckedModeBanner: AppConfig.instance.isDev,
     );
   }
 }

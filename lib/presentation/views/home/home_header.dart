@@ -30,7 +30,10 @@ class HomeHeader extends StatelessWidget {
               ),
               Text(
                 'Alex 🐾',
-                style: AppTypography.display.copyWith(fontSize: 24),
+                style: AppTypography.display.copyWith(
+                  fontSize: 24,
+                  color: AppColors.creamWarm,
+                ),
               ),
             ],
           ),

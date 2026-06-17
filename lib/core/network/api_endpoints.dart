@@ -1,15 +1,15 @@
 abstract final class ApiEndpoints {
   // Auth
-  static const String login = '/auth/login';
-  static const String register = '/auth/register';
-  static const String me = '/auth/me';
-  static const String googleAuth = '/auth/google';
+  static const String login = '/user/auth/login';
+  static const String register = '/user/auth/register';
+  static const String me = '/user/auth/me';
+  static const String googleAuth = '/user/auth/google';
 
   // Bookings
-  static const String bookings = '/bookings';
-  static String bookingById(String id) => '/bookings/$id';
+  static const String bookings = '/user/bookings';
+  static String bookingById(String id) => '/user/bookings/$id';
 
   // Services
-  static const String services = '/services';
-  static String serviceById(String id) => '/services/$id';
+  static const String services = '/user/services';
+  static String serviceById(String id) => '/user/services/$id';
 }

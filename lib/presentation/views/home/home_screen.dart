@@ -27,9 +27,21 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const HomeHeader(),
-                const SizedBox(height: AppSpacing.md),
-                const StatusCard(),
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.sageDeep,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      HomeHeader(),
+                      SizedBox(height: AppSpacing.md),
+                      StatusCard(),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: AppSpacing.lg),
                 const ServicesSection(),
               ],

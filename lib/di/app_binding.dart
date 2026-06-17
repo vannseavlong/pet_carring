@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../core/network/api_client.dart';
+import '../core/services/auth_deep_link_service.dart';
 import '../data/datasources/local/booking_local_datasource.dart';
 import '../data/datasources/remote/auth_remote_datasource.dart';
 import '../data/datasources/remote/booking_remote_datasource.dart';
@@ -11,6 +12,7 @@ import '../domain/usecases/add_booking_usecase.dart';
 import '../domain/usecases/get_bookings_usecase.dart';
 import '../domain/usecases/get_current_user_usecase.dart';
 import '../domain/usecases/login_usecase.dart';
+import '../domain/usecases/login_with_google_token_usecase.dart';
 import '../domain/usecases/logout_usecase.dart';
 import '../domain/usecases/register_usecase.dart';
 import '../presentation/controllers/auth_controller.dart';
@@ -36,6 +38,7 @@ class AppBinding extends Bindings {
     Get.lazyPut(() => LoginUseCase(Get.find()), fenix: true);
     Get.lazyPut(() => RegisterUseCase(Get.find()), fenix: true);
     Get.lazyPut(() => LogoutUseCase(Get.find()), fenix: true);
+    Get.lazyPut(() => LoginWithGoogleTokenUseCase(Get.find()), fenix: true);
 
     // Bookings
     Get.lazyPut<BookingRemoteDataSource>(
@@ -55,8 +58,11 @@ class AppBinding extends Bindings {
 
     // Controllers — auth must be eager so AuthWrapper can find it immediately
     Get.put(
-      AuthController(Get.find(), Get.find(), Get.find(), Get.find()),
+      AuthController(
+        Get.find(), Get.find(), Get.find(), Get.find(), Get.find(),
+      ),
     );
+    Get.put(AuthDeepLinkService()..init());
     Get.lazyPut(() => NavigationController(), fenix: true);
     Get.lazyPut(() => BookingController(Get.find(), Get.find()), fenix: true);
   }

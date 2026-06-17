@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
+import '../../domain/usecases/login_with_google_token_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 
@@ -11,12 +12,14 @@ class AuthController extends GetxController {
   final LoginUseCase _login;
   final RegisterUseCase _register;
   final LogoutUseCase _logout;
+  final LoginWithGoogleTokenUseCase _loginWithGoogleToken;
 
   AuthController(
     this._getCurrentUser,
     this._login,
     this._register,
     this._logout,
+    this._loginWithGoogleToken,
   );
 
   final isChecking = true.obs;
@@ -72,6 +75,20 @@ class AuthController extends GetxController {
       errorMessage.value =
           (data is Map ? data['error'] as String? : null) ?? 'Registration failed';
       rethrow;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> completeGoogleSignIn(String token) async {
+    errorMessage.value = '';
+    isLoading.value = true;
+    try {
+      final user = await _loginWithGoogleToken(token);
+      currentUser.value = user;
+      isLoggedIn.value = true;
+    } catch (_) {
+      errorMessage.value = 'Google sign-in failed';
     } finally {
       isLoading.value = false;
     }

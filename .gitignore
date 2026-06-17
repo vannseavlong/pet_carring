@@ -27,11 +27,27 @@ migrate_working_dir/
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
 /build/
 /coverage/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Android signing
+key.properties
+/android/app/upload-keystore.jks
+/android/app/*.jks
+/android/app/*.keystore
+
+# Firebase (contain project credentials — add via CI secrets)
+google-services.json
+GoogleService-Info.plist
 
 # Symbolication related
 app.*.symbols

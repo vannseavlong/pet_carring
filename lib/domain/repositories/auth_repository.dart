@@ -8,5 +8,6 @@ abstract interface class AuthRepository {
     required String password,
   });
   Future<User?> getCurrentUser();
+  Future<User> loginWithGoogleToken(String token);
   Future<void> logout();
 }

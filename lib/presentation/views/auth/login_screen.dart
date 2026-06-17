@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../core/config/app_config.dart';
+import '../../../core/network/api_endpoints.dart';
 import '../../controllers/auth_controller.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
@@ -27,6 +30,13 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailCtrl.dispose();
     _passCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _signInWithGoogle() async {
+    final uri = Uri.parse(
+      '${AppConfig.instance.baseUrl}${ApiEndpoints.googleAuth}',
+    );
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   Future<void> _submit() async {
@@ -155,7 +165,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   height: 52,
                   child: OutlinedButton.icon(
-                    onPressed: () {}, // TODO: Google OAuth
+                    onPressed: _signInWithGoogle,
                     icon: const Icon(Icons.g_mobiledata,
                         size: 28, color: AppColors.ink),
                     label: Text(

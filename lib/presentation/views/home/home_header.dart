@@ -6,7 +6,6 @@ import '../../theme/app_typography.dart';
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
 
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -29,7 +28,7 @@ class HomeHeader extends StatelessWidget {
                 style: AppTypography.micro.copyWith(color: AppColors.mist),
               ),
               Text(
-                'Alex 🐾',
+                'Alex Slader',
                 style: AppTypography.display.copyWith(
                   fontSize: 24,
                   color: AppColors.creamWarm,
@@ -48,7 +47,10 @@ class HomeHeader extends StatelessWidget {
                 color: AppColors.blushSoft,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.notifications_outlined, color: AppColors.ink),
+              child: const Icon(
+                Icons.notifications_outlined,
+                color: AppColors.ink,
+              ),
             ),
             Positioned(
               right: 0,
@@ -74,4 +76,3 @@ class HomeHeader extends StatelessWidget {
     );
   }
 }
-

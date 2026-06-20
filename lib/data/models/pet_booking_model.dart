@@ -5,35 +5,38 @@ class PetBookingModel extends PetBooking {
     required super.id,
     required super.petName,
     required super.petType,
-    required super.ownerName,
+    required super.serviceId,
+    required super.serviceName,
     required super.checkInDate,
     required super.checkOutDate,
     required super.dailyRate,
     super.status,
+    super.notes,
   });
 
   factory PetBookingModel.fromJson(Map<String, dynamic> json) {
     return PetBookingModel(
-      id: json['id'] as String,
+      id: json['booking_id'] as String,
       petName: json['pet_name'] as String,
       petType: json['pet_type'] as String,
-      ownerName: json['owner_name'] as String,
-      checkInDate: DateTime.parse(json['check_in_date'] as String),
-      checkOutDate: DateTime.parse(json['check_out_date'] as String),
+      serviceId: json['service_id'] as String,
+      serviceName: json['service_name'] as String? ?? '',
+      checkInDate: DateTime.parse(json['start_date'] as String),
+      checkOutDate: DateTime.parse(json['end_date'] as String),
       dailyRate: (json['daily_rate'] as num).toDouble(),
-      status: json['status'] as String? ?? 'active',
+      status: json['status'] as String? ?? 'pending',
+      notes: json['notes'] as String?,
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
+  Map<String, dynamic> toCreateJson() => {
         'pet_name': petName,
         'pet_type': petType,
-        'owner_name': ownerName,
-        'check_in_date': checkInDate.toIso8601String().split('T').first,
-        'check_out_date': checkOutDate.toIso8601String().split('T').first,
+        'service_id': serviceId,
+        'start_date': checkInDate.toIso8601String().split('T').first,
+        'end_date': checkOutDate.toIso8601String().split('T').first,
         'daily_rate': dailyRate,
-        'status': status,
+        if (notes != null) 'notes': notes,
       };
 
   factory PetBookingModel.fromEntity(PetBooking entity) {
@@ -41,11 +44,13 @@ class PetBookingModel extends PetBooking {
       id: entity.id,
       petName: entity.petName,
       petType: entity.petType,
-      ownerName: entity.ownerName,
+      serviceId: entity.serviceId,
+      serviceName: entity.serviceName,
       checkInDate: entity.checkInDate,
       checkOutDate: entity.checkOutDate,
       dailyRate: entity.dailyRate,
       status: entity.status,
+      notes: entity.notes,
     );
   }
 }

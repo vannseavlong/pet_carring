@@ -1,3 +1,4 @@
+import '../../../domain/entities/booking_status.dart';
 import '../../models/pet_booking_model.dart';
 
 abstract interface class BookingLocalDataSource {
@@ -11,21 +12,24 @@ class BookingLocalDataSourceImpl implements BookingLocalDataSource {
     PetBookingModel(
       id: '1',
       petName: 'Milo',
-      petType: 'Dog',
-      ownerName: 'Suntel',
+      petType: 'dog',
+      serviceId: 'svc_bath_grm',
+      serviceName: 'Bath & Grooming',
       checkInDate: DateTime.now(),
       checkOutDate: DateTime.now().add(const Duration(days: 4)),
       dailyRate: 25.0,
+      status: BookingStatus.active,
     ),
     PetBookingModel(
       id: '2',
       petName: 'Luna',
-      petType: 'Cat',
-      ownerName: 'Alice',
+      petType: 'cat',
+      serviceId: 'svc_haircut',
+      serviceName: 'Haircut & Styling',
       checkInDate: DateTime.now().subtract(const Duration(days: 10)),
       checkOutDate: DateTime.now().subtract(const Duration(days: 7)),
       dailyRate: 20.0,
-      status: 'checked_out',
+      status: BookingStatus.completed,
     ),
   ];
 

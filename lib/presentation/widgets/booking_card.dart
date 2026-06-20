@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/utils/pet_types.dart';
 import '../../domain/entities/pet_booking.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
@@ -33,7 +34,7 @@ class BookingCard extends StatelessWidget {
                     Text(booking.petName, style: AppTypography.sectionHeader),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
-                      'Owner: ${booking.ownerName}',
+                      booking.serviceName,
                       style: AppTypography.bodyMedium,
                     ),
                     const SizedBox(height: AppSpacing.xs),
@@ -69,7 +70,7 @@ class _PetAvatar extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          petType.toLowerCase() == 'dog' ? '🐶' : '🐱',
+          PetTypes.emojiFor(petType),
           style: const TextStyle(fontSize: 24),
         ),
       ),

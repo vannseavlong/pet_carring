@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.light,
       initialBinding: AppBinding(),
       home: const AuthWrapper(),
-      debugShowCheckedModeBanner: AppConfig.instance.isDev,
+      debugShowCheckedModeBanner: false,
     );
   }
 }

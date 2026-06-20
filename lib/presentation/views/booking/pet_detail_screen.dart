@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/pet_types.dart';
+import '../../../domain/entities/booking_status.dart';
 import '../../../domain/entities/pet_booking.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
@@ -36,7 +38,7 @@ class _PetHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isActive = booking.status == 'active';
+    final isOngoing = !BookingStatus.finished.contains(booking.status);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
@@ -55,7 +57,7 @@ class _PetHeader extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                booking.petType.toLowerCase() == 'dog' ? '🐶' : '🐱',
+                PetTypes.emojiFor(booking.petType),
                 style: const TextStyle(fontSize: 32),
               ),
             ),
@@ -81,7 +83,7 @@ class _PetHeader extends StatelessWidget {
                   vertical: 2,
                 ),
                 decoration: BoxDecoration(
-                  color: isActive
+                  color: isOngoing
                       ? AppColors.sageMid.withValues(alpha: 0.15)
                       : AppColors.mist.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(100),
@@ -89,7 +91,7 @@ class _PetHeader extends StatelessWidget {
                 child: Text(
                   booking.status.toUpperCase(),
                   style: AppTypography.micro.copyWith(
-                    color: isActive ? AppColors.sageMid : AppColors.mist,
+                    color: isOngoing ? AppColors.sageMid : AppColors.mist,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -114,7 +116,7 @@ class _DetailSection extends StatelessWidget {
         Text('Stay Details', style: AppTypography.sectionHeader),
         const SizedBox(height: AppSpacing.md),
         const Divider(color: AppColors.mist),
-        _DetailRow(label: 'Owner', value: booking.ownerName),
+        _DetailRow(label: 'Service', value: booking.serviceName),
         _DetailRow(
           label: 'Check In',
           value: DateFormatter.toDisplay(booking.checkInDate),
@@ -124,6 +126,8 @@ class _DetailSection extends StatelessWidget {
           value: DateFormatter.toDisplay(booking.checkOutDate),
         ),
         _DetailRow(label: 'Total Days', value: '${booking.totalDays} days'),
+        if (booking.notes != null && booking.notes!.isNotEmpty)
+          _DetailRow(label: 'Notes', value: booking.notes!),
       ],
     );
   }
@@ -197,7 +201,13 @@ class _DetailRow extends StatelessWidget {
             label,
             style: AppTypography.bodyMedium.copyWith(color: AppColors.mist),
           ),
-          Text(value, style: AppTypography.bodyMedium),
+          Expanded(
+            child: Text(
+              value,
+              style: AppTypography.bodyMedium,
+              textAlign: TextAlign.right,
+            ),
+          ),
         ],
       ),
     );

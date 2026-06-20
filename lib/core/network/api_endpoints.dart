@@ -7,6 +7,7 @@ abstract final class ApiEndpoints {
 
   // Bookings
   static const String bookings = '/user/bookings';
+  static const String activeBookings = '/user/bookings/active';
   static String bookingById(String id) => '/user/bookings/$id';
 
   // Services

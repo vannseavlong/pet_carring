@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:pet_carrying_app/presentation/theme/app_colors.dart';
 import 'package:pet_carrying_app/presentation/theme/app_typography.dart';
 import '../../controllers/navigation_controller.dart';
+import '../booking/add_booking_screen.dart';
 import '../home/home_screen.dart';
 import '../stays/stays_screen.dart';
 import '../history/history_screen.dart';
@@ -30,7 +31,7 @@ class AppScreen extends StatelessWidget {
 
       // 1. The amber + button
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => Get.to(() => const AddBookingScreen()),
         shape: const CircleBorder(),
         child: const Icon(Icons.add),
       ),

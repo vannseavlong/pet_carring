@@ -1,4 +1,5 @@
 import '../../core/errors/app_exception.dart';
+import '../../domain/entities/booking_status.dart';
 import '../../domain/entities/pet_booking.dart';
 import '../../domain/repositories/booking_repository.dart';
 import '../datasources/local/booking_local_datasource.dart';
@@ -24,10 +25,21 @@ class BookingRepositoryImpl implements BookingRepository {
   }
 
   @override
-  Future<PetBooking> addBooking(PetBooking booking) {
-    return _remote.addBooking(PetBookingModel.fromEntity(booking));
+  Future<List<PetBooking>> getActiveBookings() async {
+    try {
+      return await _remote.getActiveBookings();
+    } on AppException {
+      final cached = await _local.getCachedBookings();
+      return cached
+          .where((b) =>
+              b.status == BookingStatus.confirmed ||
+              b.status == BookingStatus.active)
+          .toList();
+    }
   }
 
   @override
-  Future<void> deleteBooking(String id) => _remote.deleteBooking(id);
+  Future<PetBooking> addBooking(PetBooking booking) {
+    return _remote.addBooking(PetBookingModel.fromEntity(booking));
+  }
 }

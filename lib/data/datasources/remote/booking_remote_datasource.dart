@@ -6,8 +6,8 @@ import '../../models/pet_booking_model.dart';
 
 abstract interface class BookingRemoteDataSource {
   Future<List<PetBookingModel>> getBookings();
+  Future<List<PetBookingModel>> getActiveBookings();
   Future<PetBookingModel> addBooking(PetBookingModel booking);
-  Future<void> deleteBooking(String id);
 }
 
 class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
@@ -19,7 +19,23 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
   Future<List<PetBookingModel>> getBookings() async {
     try {
       final response = await _apiClient.dio.get(ApiEndpoints.bookings);
-      final data = response.data as List<dynamic>;
+      final data = response.data['bookings'] as List<dynamic>;
+      return data
+          .map((e) => PetBookingModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw NetworkException(
+        e.message ?? 'Network error',
+        statusCode: e.response?.statusCode,
+      );
+    }
+  }
+
+  @override
+  Future<List<PetBookingModel>> getActiveBookings() async {
+    try {
+      final response = await _apiClient.dio.get(ApiEndpoints.activeBookings);
+      final data = response.data['bookings'] as List<dynamic>;
       return data
           .map((e) => PetBookingModel.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -36,21 +52,11 @@ class BookingRemoteDataSourceImpl implements BookingRemoteDataSource {
     try {
       final response = await _apiClient.dio.post(
         ApiEndpoints.bookings,
-        data: booking.toJson(),
+        data: booking.toCreateJson(),
       );
-      return PetBookingModel.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw NetworkException(
-        e.message ?? 'Network error',
-        statusCode: e.response?.statusCode,
+      return PetBookingModel.fromJson(
+        response.data['booking'] as Map<String, dynamic>,
       );
-    }
-  }
-
-  @override
-  Future<void> deleteBooking(String id) async {
-    try {
-      await _apiClient.dio.delete(ApiEndpoints.bookingById(id));
     } on DioException catch (e) {
       throw NetworkException(
         e.message ?? 'Network error',

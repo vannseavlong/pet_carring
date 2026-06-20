@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../controllers/auth_controller.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
@@ -8,71 +10,88 @@ class HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Avatar
-        CircleAvatar(
-          radius: 24,
-          backgroundImage: const NetworkImage(
-            'https://i.pravatar.cc/150?img=3',
+    final auth = Get.find<AuthController>();
+
+    return Obx(() {
+      final user = auth.currentUser.value;
+      final name = user?.fullName ?? '';
+      final picture = user?.picture;
+      final initials = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
+
+      return Row(
+        children: [
+          // Avatar
+          CircleAvatar(
+            radius: 24,
+            backgroundColor: AppColors.blushSoft,
+            backgroundImage: picture != null ? NetworkImage(picture) : null,
+            child: picture == null
+                ? Text(
+                    initials,
+                    style: AppTypography.sectionHeader.copyWith(
+                      color: AppColors.sageDeep,
+                    ),
+                  )
+                : null,
           ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        // Greeting + name
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(width: AppSpacing.md),
+          // Greeting + name
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Good morning,',
+                  style: AppTypography.micro.copyWith(color: AppColors.mist),
+                ),
+                Text(
+                  name,
+                  style: AppTypography.display.copyWith(
+                    fontSize: 24,
+                    color: AppColors.creamWarm,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          // Notification bell with badge
+          Stack(
             children: [
-              Text(
-                'Good morning,',
-                style: AppTypography.micro.copyWith(color: AppColors.mist),
+              Container(
+                width: 44,
+                height: 44,
+                decoration: const BoxDecoration(
+                  color: AppColors.blushSoft,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.notifications_outlined,
+                  color: AppColors.ink,
+                ),
               ),
-              Text(
-                'Alex Slader',
-                style: AppTypography.display.copyWith(
-                  fontSize: 24,
-                  color: AppColors.creamWarm,
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Container(
+                  width: 18,
+                  height: 18,
+                  decoration: const BoxDecoration(
+                    color: AppColors.amberAccent,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '3',
+                      style: AppTypography.micro.copyWith(color: Colors.white),
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
-        ),
-        // Notification bell with badge
-        Stack(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: const BoxDecoration(
-                color: AppColors.blushSoft,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.notifications_outlined,
-                color: AppColors.ink,
-              ),
-            ),
-            Positioned(
-              right: 0,
-              top: 0,
-              child: Container(
-                width: 18,
-                height: 18,
-                decoration: const BoxDecoration(
-                  color: AppColors.amberAccent,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    '3',
-                    style: AppTypography.micro.copyWith(color: Colors.white),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 }

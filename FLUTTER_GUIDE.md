@@ -1,120 +1,279 @@
-# Paw — Flutter Integration Guide
+# Paw — API Summary for Flutter
 
-**Status:** Email/Password login & registration ✅ implemented and working. Google Sign-In ⚠️ designed and working on the backend, **not yet implemented in the app**.
+Backend base URL: `http://localhost:3000` (dev) / `https://your-api.com` (prod)
 
-Base URL: `AppConfig.instance.baseUrl` → `http://localhost:3000` (dev, [app_config.dart:20](lib/core/config/app_config.dart#L20)) / `https://your-api.com` (prod placeholder — update before shipping).
+Every route below (except `/health`) is mounted under the `/user` prefix —
+e.g. `POST /user/bookings`, not `POST /bookings`.
 
-All authenticated endpoints require:
+All endpoints marked **Bearer** require:
 ```
 Authorization: Bearer <jwt_token>
 ```
-attached automatically by `ApiClient`'s request interceptor ([api_client.dart:21](lib/core/network/api_client.dart#L21)) when a token is stored in `flutter_secure_storage` under the key `jwt_token` ([api_client.dart:43](lib/core/network/api_client.dart#L43)).
 
----
-
-## 1. Where things already live
-
-This app is a working GetX clean-architecture app, not a starter template — see [CLAUDE.md](CLAUDE.md) for the full layout. The pieces relevant to auth:
-
-| Layer | File | Role |
-|---|---|---|
-| presentation | [`auth_wrapper.dart`](lib/presentation/views/auth/auth_wrapper.dart), [`login_screen.dart`](lib/presentation/views/auth/login_screen.dart), [`register_screen.dart`](lib/presentation/views/auth/register_screen.dart) | UI + form validation |
-| presentation | [`auth_controller.dart`](lib/presentation/controllers/auth_controller.dart) | `.obs` state: `isChecking`, `isLoggedIn`, `isLoading`, `currentUser`, `errorMessage` |
-| domain | `lib/domain/usecases/{login,register,logout,get_current_user}_usecase.dart` | Thin call-throughs to `AuthRepository` |
-| domain | [`auth_repository.dart`](lib/domain/repositories/auth_repository.dart), [`user.dart`](lib/domain/entities/user.dart) | Interface + `User` entity (`userId, email, fullName, role, picture`) |
-| data | [`auth_repository_impl.dart`](lib/data/repositories/auth_repository_impl.dart) | Saves/clears token via `ApiClient`, delegates HTTP to the data source |
-| data | [`auth_remote_datasource.dart`](lib/data/datasources/remote/auth_remote_datasource.dart) | Actual Dio calls to `/auth/login`, `/auth/register`, `/auth/me` |
-| data | [`user_model.dart`](lib/data/models/user_model.dart) | `UserModel.fromJson` |
-| core | [`api_client.dart`](lib/core/network/api_client.dart), [`api_endpoints.dart`](lib/core/network/api_endpoints.dart) | Dio instance, secure-storage token, endpoint constants |
-| di | [`app_binding.dart`](lib/di/app_binding.dart) | Wires all of the above; `AuthController` is `Get.put` eagerly so `AuthWrapper` can read it on the first frame |
-
-`AuthWrapper` is the app's root widget: spinner while `isChecking` is true, then `LoginScreen` or `AppScreen` based on `isLoggedIn`.
-
----
-
-## 2. Email + Password — done, and now more reliable
-
-Registration and login were already correctly implemented on your side — the request/response shapes you built against haven't changed. What changed is on the **backend**, where two latent bugs meant every `/auth/register` and `/auth/login` call was returning a `500`:
-
-1. The admin Google Sheets context had no fallback for cached OAuth tokens, so every request crashed with `Cannot read properties of null (reading 'access_token')`.
-2. `JWT_SECRET` was never set in the backend's `.env`, so token signing threw on every otherwise-successful registration/login.
-
-Both are fixed and verified end-to-end against the real Google Sheets backend. **No client-side changes are required** — `AuthRemoteDataSourceImpl`, `AuthRepositoryImpl`, and `AuthController` already match the contract:
-
-- `POST /auth/register` → `{ full_name, email, password }` → `201 { token, user }`
-- `POST /auth/login` → `{ email, password }` → `200 { token, user }`
-- `GET /auth/me` (Bearer) → `200 { user }`
-
-One thing worth knowing for later: the `user` object the backend returns also includes `actor_sheet_id` and `auth_provider`, which `UserModel.fromJson` ([user_model.dart:12](lib/data/models/user_model.dart#L12)) currently drops. Not a bug — the app doesn't need them yet — but `auth_provider` becomes relevant once Google Sign-In exists: `/auth/login` rejects a password login with `400 { error: "This account uses google login. Use Google Sign-In instead." }` if the account was created via Google, so you may eventually want to surface that distinction in the UI.
-
----
-
-## 3. Google Sign-In — not implemented yet, here's what it needs
-
-[`login_screen.dart:158`](lib/presentation/views/auth/login_screen.dart#L158) already has the button:
-```dart
-onPressed: () {}, // TODO: Google OAuth
-```
-It's a stub. There's no `google_sign_in` or `app_links` dependency in `pubspec.yaml`, no custom URL scheme registered in `android/app/src/main/AndroidManifest.xml` or `ios/Runner/Info.plist` (checked both — neither has any deep-link config beyond the default launcher intent-filter), and no `ApiEndpoints` entry for it.
-
-On the backend, `GET /auth/google` → Google consent → `GET /auth/callback` is fully implemented and was just fixed (the `onUser` callback hit the same missing-token/`JWT_SECRET` bugs as §2). It's ready to be wired up, but it's a **browser-redirect flow**, not the native Google Sign-In SDK. That shapes what you need to build:
-
-### What the backend does
-On success it redirects the browser to:
-```
-{FRONTEND_URL}?token=<jwt>
-```
-`FRONTEND_URL` is currently **unset** in the backend's `.env`, so it defaults to `http://localhost:3000` — not usable as a mobile redirect target. It needs to be set to whatever custom scheme you register below (e.g. `paw://auth-callback`) before this works end to end. That's a one-line backend `.env` change on our side once you've picked a scheme — just tell us what it is.
-
-On failure, the backend does not currently append an error code to the redirect — you'd see a direct error response from `/auth/callback` instead. If you need a specific failure contract (e.g. `paw://auth-callback?error=...`), flag it and we'll add it; it isn't built today.
-
-### What the app needs
-1. Add to `pubspec.yaml`: `app_links: ^6.3.2` (catch the redirect) and `url_launcher: ^6.3.1` (open the consent screen in the system browser). Neither is currently a dependency.
-2. Register a custom scheme, e.g. `paw://auth-callback`:
-   - Android: add an `<intent-filter>` with `<data android:scheme="paw" android:host="auth-callback"/>` to the launcher activity in `android/app/src/main/AndroidManifest.xml`.
-   - iOS: add a `CFBundleURLTypes` entry to `ios/Runner/Info.plist`.
-3. On tap, launch `${AppConfig.instance.baseUrl}/auth/google` with `launchUrl(..., mode: LaunchMode.externalApplication)` — this must be a real browser hand-off, not a Dio call, since the user has to interact with Google's consent screen.
-4. Listen for the return via `AppLinks().uriLinkStream` (set up once — e.g. in `main.dart` or a small service registered in `AppBinding`). When `paw://auth-callback?token=...` arrives, pull `token` from `uri.queryParameters`, save it the same way `AuthRepositoryImpl` does (`ApiClient.saveToken`), then re-run the same check `AuthController` already does on startup (`GetCurrentUserUseCase` → `GET /auth/me`) so `currentUser`/`isLoggedIn` populate exactly like a password login does.
-
-We did **not** build a native-SDK alternative (client-side `google_sign_in` + server-side ID-token verification) — that would need a new backend endpoint that doesn't exist today. If you'd rather have that smoother in-app UX instead of a browser hand-off, tell us and we'll add the endpoint; the redirect flow above is what's actually live right now.
-
----
-
-## 4. API Reference (verified against current backend code)
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | `/auth/register` | — | `{ full_name, email, password }` → `201 { token, user }`. `409` if email exists, `422` on weak password (`{ error, details: [...] }`). |
-| POST | `/auth/login` | — | `{ email, password }` → `200 { token, user }`. `401` on bad credentials, `400` if the account was created via Google. |
-| GET | `/auth/google` | — | Redirects to Google's consent screen. Not yet wired up client-side — see §3. |
-| GET | `/auth/me` | Bearer | `200 { user }`. `404` if the JWT's user no longer exists. |
-| GET | `/services` | — | `200 { services }` — active services, sorted by `sort_order`. |
-| GET | `/services/:id` | — | `200 { service }` or `404`. |
-| POST / PATCH / DELETE | `/services[/:id]` | Bearer (admin) | Admin-only service management; `DELETE` is a soft delete (`active: false`). |
-| GET | `/profile` | Bearer | `200 { profile }` — auto-creates an empty profile row on first call. `422` if the user has no `actor_sheet_id`. |
-| PATCH | `/profile` | Bearer | `{ full_name?, phone?, avatar_url?, bio? }` → `200 { profile }`. `400` if no fields given. |
-| POST | `/bookings` | Bearer | `{ pet_name, pet_type, service_id, start_date, end_date, daily_rate, notes? }` → `201 { booking }` (includes computed `nights`/`total`). `404` if `service_id` doesn't exist. |
-| GET | `/bookings` | Bearer | `?status=&limit=&offset=` → `200 { bookings, total, limit, offset }`. |
-| GET | `/bookings/active` | Bearer | `200 { bookings, total }` — `active` + `confirmed` only. |
-| GET | `/bookings/:id` | Bearer | `200 { booking }` or `404`. |
-| PATCH | `/bookings/:id` | Bearer | `{ notes?, status: 'cancelled' }` → `200 { booking }`. `409` if already `cancelled`/`completed`. |
-
-### Error response shape
+### Error shape (all endpoints)
 ```json
-{ "error": "Human-readable message", "details": ["..."] }
+{ "error": "Human-readable message", "details": ["optional", "validation", "errors"] }
 ```
-`details` is only present on `422` validation errors. Status codes in use: `400` bad input · `401` unauthenticated · `403` forbidden · `404` not found · `409` conflict · `422` unprocessable · `500` server error.
+Status codes: `400` bad input · `401` unauthenticated · `403` forbidden · `404` not found · `409` conflict · `422` unprocessable · `500` server error
 
 ---
 
-## 5. Backend commands (for reference, run from `paw_sheetDB/`)
+## 1. Auth — `/user/auth`
+
+| Method | Endpoint | Auth | Body → Response |
+|--------|----------|------|------------------|
+| POST | `/user/auth/register` | — | `{ full_name, email, password }` → `{ token, user }` |
+| POST | `/user/auth/login` | — | `{ email, password }` → `{ token, user }` |
+| GET | `/user/auth/google` | — | Redirects to Google OAuth consent screen |
+| GET | `/user/auth/callback` | — | OAuth callback; redirects to `FRONTEND_URL` with `?token=` |
+| GET | `/user/auth/me` | Bearer | → `{ user }` |
+
+`user` object: `{ user_id, email, full_name, role, picture, actor_sheet_id, auth_provider, status }`
+
+```dart
+class UserModel {
+  final String userId;
+  final String email;
+  final String fullName;
+  final String role;
+  final String? picture;
+  final String? actorSheetId;
+
+  const UserModel({
+    required this.userId,
+    required this.email,
+    required this.fullName,
+    required this.role,
+    this.picture,
+    this.actorSheetId,
+  });
+
+  factory UserModel.fromJson(Map<String, dynamic> j) => UserModel(
+        userId:       j['user_id'] as String,
+        email:        j['email'] as String,
+        fullName:     j['full_name'] as String,
+        role:         j['role'] as String,
+        picture:      j['picture'] as String?,
+        actorSheetId: j['actor_sheet_id'] as String?,
+      );
+}
+```
+
+---
+
+## 2. Services — `/user/services`
+
+| Method | Endpoint | Auth | Body → Response |
+|--------|----------|------|------------------|
+| GET | `/user/services` | — | → `{ services: ServiceModel[] }` (active only, sorted by `sort_order`) |
+| GET | `/user/services/:id` | — | → `{ service }` |
+
+```dart
+class ServiceModel {
+  final String serviceId;
+  final String name;
+  final String description;
+  final double priceFrom;
+  final String icon;     // key into the app's local icon map
+  final String color;    // card background hex, e.g. "#D6EAE4"
+  final String category;
+
+  const ServiceModel({
+    required this.serviceId,
+    required this.name,
+    required this.description,
+    required this.priceFrom,
+    required this.icon,
+    required this.color,
+    required this.category,
+  });
+
+  factory ServiceModel.fromJson(Map<String, dynamic> j) => ServiceModel(
+        serviceId:   j['service_id'] as String,
+        name:        j['name'] as String,
+        description: j['description'] as String? ?? '',
+        priceFrom:   (j['price_from'] as num).toDouble(),
+        icon:        j['icon'] as String,
+        color:       j['color'] as String,
+        category:    j['category'] as String,
+      );
+}
+```
+
+---
+
+## 3. Profile — `/user/profile`
+
+| Method | Endpoint | Auth | Body → Response |
+|--------|----------|------|------------------|
+| GET | `/user/profile` | Bearer | → `{ profile }` (auto-created on first call) |
+| PATCH | `/user/profile` | Bearer | `{ full_name?, phone?, avatar_url?, bio? }` → `{ profile }` |
+
+`profile` object: `{ user_id, full_name, email, phone, avatar_url, bio, role, auth_provider, status }`
+
+---
+
+## 4. Bookings — `/user/bookings`
+
+This is the API behind the **New Booking** screen (pet name, pet type, stay
+duration, daily rate, notes → Confirm Booking). `service_id` is carried over
+from whichever service card the user tapped to get here — it is not a field
+on the form itself.
+
+| Method | Endpoint | Auth | Body → Response |
+|--------|----------|------|------------------|
+| POST | `/user/bookings` | Bearer | Create booking → `{ booking }` |
+| GET | `/user/bookings` | Bearer | `?status=&limit=&offset=` → `{ bookings, total, limit, offset }` |
+| GET | `/user/bookings/active` | Bearer | Confirmed + active bookings (Stays tab) → `{ bookings, total }` |
+| GET | `/user/bookings/:id` | Bearer | → `{ booking }` |
+| PATCH | `/user/bookings/:id` | Bearer | `{ notes?, status? }` → `{ booking }` |
+
+### Create — request body
+```json
+{
+  "pet_name":   "Buddy",
+  "pet_type":   "dog",
+  "service_id": "svc_bath_grm",
+  "start_date": "2026-06-12",
+  "end_date":   "2026-06-16",
+  "daily_rate": 25,
+  "notes":      "Loves belly rubs"
+}
+```
+- `pet_type` must be one of: `dog`, `cat`, `bird`, `rabbit`, `other`
+- `service_id` must reference an existing service (404 if not found)
+- `end_date` must be strictly after `start_date` (400 otherwise)
+- `notes` is optional
+
+### Booking object (response)
+```json
+{
+  "booking_id":   "bk_sjK8C8N7qc",
+  "pet_name":     "Buddy",
+  "pet_type":     "dog",
+  "service_id":   "svc_bath_grm",
+  "service_name": "Bath & Grooming",
+  "start_date":   "2026-06-12",
+  "end_date":     "2026-06-16",
+  "daily_rate":   25,
+  "notes":        "Loves belly rubs",
+  "status":       "pending",
+  "nights":       4,
+  "total":        100
+}
+```
+`nights` and `total` (`daily_rate * nights`) are computed server-side on every read — use them directly for the confirmation/receipt screen, no client-side math needed.
+
+`status` lifecycle: `pending → confirmed → active → completed`, or `→ cancelled` at any point before `completed`.
+
+### Update
+- Regular users may only PATCH `notes` and/or set `status: "cancelled"`. Any other status value returns `400`.
+- A booking already `cancelled` or `completed` can no longer be modified (`409`).
+- (Moving a booking through `confirmed` / `active` / `completed` is an admin-side operation, not yet exposed on a user-facing route.)
+
+```dart
+class BookingModel {
+  final String bookingId;
+  final String petName;
+  final String petType;
+  final String serviceId;
+  final String serviceName;
+  final DateTime startDate;
+  final DateTime endDate;
+  final double dailyRate;
+  final String notes;
+  final String status;
+  final int nights;
+  final double total;
+
+  const BookingModel({
+    required this.bookingId,
+    required this.petName,
+    required this.petType,
+    required this.serviceId,
+    required this.serviceName,
+    required this.startDate,
+    required this.endDate,
+    required this.dailyRate,
+    required this.notes,
+    required this.status,
+    required this.nights,
+    required this.total,
+  });
+
+  factory BookingModel.fromJson(Map<String, dynamic> j) => BookingModel(
+        bookingId:   j['booking_id'] as String,
+        petName:     j['pet_name'] as String,
+        petType:     j['pet_type'] as String,
+        serviceId:   j['service_id'] as String,
+        serviceName: j['service_name'] as String,
+        startDate:   DateTime.parse(j['start_date'] as String),
+        endDate:     DateTime.parse(j['end_date'] as String),
+        dailyRate:   (j['daily_rate'] as num).toDouble(),
+        notes:       j['notes'] as String? ?? '',
+        status:      j['status'] as String,
+        nights:      j['nights'] as int,
+        total:       (j['total'] as num).toDouble(),
+      );
+}
+```
+
+```dart
+class BookingsRepository {
+  Future<BookingModel> create({
+    required String petName,
+    required String petType,
+    required String serviceId,
+    required DateTime startDate,
+    required DateTime endDate,
+    required double dailyRate,
+    String? notes,
+  }) async {
+    final res = await apiClient.post('/user/bookings', data: {
+      'pet_name':   petName,
+      'pet_type':   petType,
+      'service_id': serviceId,
+      'start_date': startDate.toIso8601String().split('T').first,
+      'end_date':   endDate.toIso8601String().split('T').first,
+      'daily_rate': dailyRate,
+      if (notes != null) 'notes': notes,
+    });
+    return BookingModel.fromJson(res.data['booking'] as Map<String, dynamic>);
+  }
+
+  Future<List<BookingModel>> list({String? status}) async {
+    final res = await apiClient.get('/user/bookings', params: {
+      if (status != null) 'status': status,
+    });
+    final list = res.data['bookings'] as List<dynamic>;
+    return list.map((j) => BookingModel.fromJson(j as Map<String, dynamic>)).toList();
+  }
+
+  Future<List<BookingModel>> listActive() async {
+    final res = await apiClient.get('/user/bookings/active');
+    final list = res.data['bookings'] as List<dynamic>;
+    return list.map((j) => BookingModel.fromJson(j as Map<String, dynamic>)).toList();
+  }
+
+  Future<BookingModel> cancel(String bookingId) async {
+    final res = await apiClient.patch('/user/bookings/$bookingId', data: {
+      'status': 'cancelled',
+    });
+    return BookingModel.fromJson(res.data['booking'] as Map<String, dynamic>);
+  }
+}
+```
+
+---
+
+## 5. Commands quick reference
 
 ```bash
 # Seed services into the admin sheet (run once)
 pnpm db:seed seeds/admin.ts --skip-existing
 
-# Create mock user accounts for testing
-pnpm db:mock-users 3
+# Seed 3 test user accounts (jamie / taylor / morgan @test.local, password Test1234!)
+pnpm db:seed seeds/test-users.ts --skip-existing
 
 # Start the API server
 pnpm dev

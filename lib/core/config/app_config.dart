@@ -16,16 +16,16 @@ class AppConfig {
   static void setup(AppConfig config) => _instance = config;
 
   factory AppConfig.dev() => const AppConfig._(
-        flavor: Flavor.dev,
-        baseUrl: 'http://localhost:3000',
-        appName: 'Paw (Dev)',
-      );
+    flavor: Flavor.dev,
+    baseUrl: 'http://localhost:3000',
+    appName: 'Paw Care (Dev)',
+  );
 
   factory AppConfig.prod() => const AppConfig._(
-        flavor: Flavor.prod,
-        baseUrl: 'https://your-api.com',
-        appName: 'Paw',
-      );
+    flavor: Flavor.prod,
+    baseUrl: 'https://backend-paw-eo3p.onrender.com',
+    appName: 'Paw Care',
+  );
 
   bool get isDev => flavor == Flavor.dev;
 }

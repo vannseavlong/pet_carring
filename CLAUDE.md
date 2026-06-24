@@ -5,14 +5,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-flutter pub get          # Install / sync dependencies
-flutter run              # Run on connected device or simulator
-flutter analyze          # Static analysis (dart analyze lib/ also works)
-flutter test             # Run all tests
-flutter test test/widget_test.dart   # Run a single test file
-flutter build apk        # Android release build
-flutter build ios        # iOS release build
+flutter pub get                                        # Install / sync dependencies
+flutter run -t lib/main_dev.dart --flavor dev          # Run dev flavor (local backend)
+flutter run -t lib/main_prod.dart --flavor prod        # Run prod flavor (live backend)
+flutter analyze                                        # Static analysis (dart analyze lib/ also works)
+flutter test                                           # Run all tests
+flutter test test/widget_test.dart                     # Run a single test file
+flutter build apk --flavor dev -t lib/main_dev.dart    # Android dev APK
+flutter build apk --flavor prod -t lib/main_prod.dart  # Android prod release APK (signed, see Release signing below)
+flutter build ios -t lib/main_prod.dart                # iOS release build (no flavor — see Flavors below)
 ```
+
+## Flavors
+
+Two flavors, each with its own Dart entry point and `AppConfig` (`lib/core/config/app_config.dart`, `lib/flavors.dart`):
+
+| Flavor | Entry point | `applicationId` | `appName` | `baseUrl` |
+|---|---|---|---|---|
+| `dev` | `lib/main_dev.dart` | `com.example.pet_carrying_app.dev` | Paw Care (Dev) | `http://localhost:3000` |
+| `prod` | `lib/main_prod.dart` | `com.example.pet_carrying_app` | Paw Care | `https://backend-paw-eo3p.onrender.com` |
+
+`lib/main.dart` is the plain entry point (defaults to dev config) used by `flutter test` / `flutter run` without `-t`; prefer the explicit `-t lib/main_<flavor>.dart` form above for anything flavor-sensitive.
+
+Android product flavors are declared in `android/app/build.gradle.kts` (`flavorDimensions`/`productFlavors`) and must be passed via `--flavor`. **iOS has no per-flavor Xcode scheme yet** — only one `Runner` scheme exists, so iOS builds always use the entry-point's baked-in config (`-t lib/main_prod.dart`) without a `--flavor` flag. Add `dev`/`prod` schemes and xcconfigs if iOS flavor parity is needed later.
 
 ## Architecture
 
@@ -89,6 +104,20 @@ Obx(() => Icon(
 ### API integration
 
 Set `ApiEndpoints.baseUrl` in `lib/core/network/api_endpoints.dart`. The repository already handles the remote→cache fallback. When the API is live, `BookingLocalDataSourceImpl`'s seed data is overwritten on first successful fetch.
+
+## Release signing (Android)
+
+`android/app/build.gradle.kts` signs `release` builds with `android/key.properties` + `android/app/upload-keystore.jks` when present, falling back to the debug key when they're absent (so a fresh checkout without the keystore still builds via `flutter run --release`).
+
+- Both `key.properties` and `*.jks` are gitignored — **never commit them**. `android/key.properties.example` documents the expected keys (`storePassword`, `keyPassword`, `keyAlias`, `storeFile`).
+- The keystore is the app's permanent Play Store signing identity. **Back it up somewhere durable outside git** (password manager / secrets vault) — losing it means you can never ship an update under the same identity again.
+- To regenerate from scratch (only if no keystore exists yet or you're starting a new app identity):
+  ```bash
+  keytool -genkeypair -v -keystore android/app/upload-keystore.jks \
+    -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+  ```
+  then fill in `android/key.properties` from `android/key.properties.example`.
+- CI: provide `key.properties` and the `.jks` as secrets/artifacts at build time rather than committing them.
 
 ## Design Tokens
 

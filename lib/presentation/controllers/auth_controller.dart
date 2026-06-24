@@ -49,9 +49,7 @@ class AuthController extends GetxController {
       currentUser.value = user;
       isLoggedIn.value = true;
     } on DioException catch (e) {
-      final data = e.response?.data;
-      errorMessage.value =
-          (data is Map ? data['error'] as String? : null) ?? 'Login failed';
+      errorMessage.value = _extractErrorMessage(e, 'Login failed');
       rethrow;
     } finally {
       isLoading.value = false;
@@ -71,13 +69,22 @@ class AuthController extends GetxController {
       currentUser.value = user;
       isLoggedIn.value = true;
     } on DioException catch (e) {
-      final data = e.response?.data;
-      errorMessage.value =
-          (data is Map ? data['error'] as String? : null) ?? 'Registration failed';
+      errorMessage.value = _extractErrorMessage(e, 'Registration failed');
       rethrow;
     } finally {
       isLoading.value = false;
     }
+  }
+
+  String _extractErrorMessage(DioException e, String fallback) {
+    final data = e.response?.data;
+    if (data is! Map) return fallback;
+    final error = data['error'] as String? ?? fallback;
+    final details = data['details'];
+    if (details is List && details.isNotEmpty) {
+      return '$error: ${details.join(', ')}';
+    }
+    return error;
   }
 
   Future<void> completeGoogleSignIn(String token) async {

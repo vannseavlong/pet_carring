@@ -121,10 +121,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
                   ),
-                  validator: (v) =>
-                      v != null && v.length >= 8 ? null : 'Minimum 8 characters',
+                  validator: _validatePassword,
                 ),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Min. 8 characters, with an uppercase letter and a number',
+                  style: AppTypography.micro.copyWith(color: AppColors.mist),
+                ),
+                const SizedBox(height: AppSpacing.lg),
 
                 Obx(() => SizedBox(
                   width: double.infinity,
@@ -185,6 +189,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
     );
+  }
+
+  String? _validatePassword(String? v) {
+    if (v == null || v.length < 8) return 'Minimum 8 characters';
+    if (!v.contains(RegExp(r'[A-Z]'))) return 'Add an uppercase letter';
+    if (!v.contains(RegExp(r'[0-9]'))) return 'Add a number';
+    return null;
   }
 
   Widget _label(String text) => Padding(

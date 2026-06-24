@@ -1,6 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Required for the app's own network calls (Dio, google_fonts) in release
+         builds — debug/profile get this from their manifest overlays instead,
+         which is why this was only failing in release. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="pet_carrying_app"
+        android:label="@string/app_name"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -9,8 +9,13 @@ class AuthDeepLinkService {
   final AppLinks _appLinks = AppLinks();
   StreamSubscription<Uri>? _subscription;
 
-  void init() {
+  Future<void> init() async {
     _subscription = _appLinks.uriLinkStream.listen(_handleUri);
+    // Covers a cold start: if Android killed the app while the user was in
+    // the browser completing Google sign-in, the redirect that relaunches
+    // the app never reaches uriLinkStream — only getInitialLink() sees it.
+    final initialUri = await _appLinks.getInitialLink();
+    if (initialUri != null) _handleUri(initialUri);
   }
 
   void _handleUri(Uri uri) {

@@ -5,13 +5,15 @@
       "name": "Paw (dev)",
       "request": "launch",
       "type": "dart",
-      "program": "lib/main_dev.dart"
+      "program": "lib/main_dev.dart",
+      "args": ["--flavor", "dev"]
     },
     {
       "name": "Paw (prod)",
       "request": "launch",
       "type": "dart",
-      "program": "lib/main_prod.dart"
+      "program": "lib/main_prod.dart",
+      "args": ["--flavor", "prod"]
     }
   ]
 }

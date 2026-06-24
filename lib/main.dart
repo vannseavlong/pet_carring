@@ -6,7 +6,6 @@ import 'presentation/theme/app_theme.dart';
 import 'presentation/views/auth/auth_wrapper.dart';
 
 void main() {
-  AppConfig.setup(AppConfig.dev());
   bootstrap();
 }
 

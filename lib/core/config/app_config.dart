@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../flavors.dart';
 
 class AppConfig {
@@ -15,15 +16,15 @@ class AppConfig {
   static AppConfig get instance => _instance!;
   static void setup(AppConfig config) => _instance = config;
 
-  factory AppConfig.dev() => const AppConfig._(
+  factory AppConfig.dev() => AppConfig._(
         flavor: Flavor.dev,
-        baseUrl: 'http://localhost:3000',
+        baseUrl: dotenv.env['BASE_URL'] ?? 'http://10.0.2.2:3000',
         appName: 'Paw (Dev)',
       );
 
-  factory AppConfig.prod() => const AppConfig._(
+  factory AppConfig.prod() => AppConfig._(
         flavor: Flavor.prod,
-        baseUrl: 'https://your-api.com',
+        baseUrl: dotenv.env['BASE_URL'] ?? 'https://your-api.com',
         appName: 'Paw',
       );
 

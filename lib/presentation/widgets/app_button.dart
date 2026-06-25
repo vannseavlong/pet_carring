@@ -23,6 +23,12 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textColor = switch (variant) {
+      AppButtonVariant.primary => AppColors.creamWarm,
+      AppButtonVariant.secondary => AppColors.sageDeep,
+      AppButtonVariant.ghost => AppColors.sageMid,
+    };
+
     final content = isLoading
         ? const SizedBox(
             width: 20,
@@ -36,10 +42,10 @@ class AppButton extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (icon != null) ...[
-                Icon(icon, size: 18),
+                Icon(icon, size: 18, color: textColor),
                 const SizedBox(width: AppSpacing.sm),
               ],
-              Text(label, style: AppTypography.bodyMedium),
+              Text(label, style: AppTypography.bodyMedium.copyWith(color: textColor)),
             ],
           );
 

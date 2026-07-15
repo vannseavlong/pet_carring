@@ -119,6 +119,10 @@ Set `ApiEndpoints.baseUrl` in `lib/core/network/api_endpoints.dart`. The reposit
   then fill in `android/key.properties` from `android/key.properties.example`.
 - CI: provide `key.properties` and the `.jks` as secrets/artifacts at build time rather than committing them.
 
+## Related project
+
+`../paw_sheetDB` is the Express/Google-Sheets backend this app talks to (`dev` flavor → `http://localhost:3000`, run `pnpm dev` there first). `FLUTTER_GUIDE.md` in both repos documents the API contract (endpoint shapes, Dart model snippets) — keep both copies in sync when request/response shapes change.
+
 ## Design Tokens
 
 All tokens live in `lib/presentation/theme/`. Use these classes directly — never hardcode colors or sizes.

@@ -7,10 +7,13 @@ abstract final class ApiEndpoints {
 
   // Bookings
   static const String bookings = '/user/bookings';
-  static const String activeBookings = '/user/bookings/active';
   static String bookingById(String id) => '/user/bookings/$id';
 
-  // Services
-  static const String services = '/user/services';
-  static String serviceById(String id) => '/user/services/$id';
+  // Shops — assumed contract, mirrors the /user/services convention;
+  // backend endpoints are landing in parallel (see paw_sheetDB TODO.md).
+  // Falls back to local mock data (see ShopLocalDataSource) until live.
+  static const String shops = '/user/shops';
+  static String shopById(String id) => '/user/shops/$id';
+  static String shopCatalogItems(String shopId) =>
+      '/user/shops/$shopId/catalog-items';
 }

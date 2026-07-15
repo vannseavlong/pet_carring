@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'core/config/app_config.dart';
 import 'di/app_binding.dart';
+import 'presentation/routes/app_pages.dart';
 import 'presentation/theme/app_theme.dart';
 import 'presentation/views/auth/auth_wrapper.dart';
 
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.light,
       initialBinding: AppBinding(),
       home: const AuthWrapper(),
+      getPages: AppPages.pages,
       debugShowCheckedModeBanner: false,
     );
   }

@@ -12,6 +12,7 @@ class PetBookingModel extends PetBooking {
     required super.dailyRate,
     super.status,
     super.notes,
+    super.shopId,
   });
 
   factory PetBookingModel.fromJson(Map<String, dynamic> json) {
@@ -26,13 +27,19 @@ class PetBookingModel extends PetBooking {
       dailyRate: (json['daily_rate'] as num).toDouble(),
       status: json['status'] as String? ?? 'pending',
       notes: json['notes'] as String?,
+      shopId: json['shop_id'] as String? ?? '',
     );
   }
 
   Map<String, dynamic> toCreateJson() => {
         'pet_name': petName,
         'pet_type': petType,
-        'service_id': serviceId,
+        // Every booking in this app now originates from a shop's catalog
+        // (ShopDetailScreen), never the legacy flat `services` table — so
+        // this always sends `item_id`, never `service_id`. The backend
+        // derives `shop_id` server-side from the item; it's not an
+        // accepted field on create (see FLUTTER_GUIDE.md § Bookings).
+        'item_id': serviceId,
         'start_date': checkInDate.toIso8601String().split('T').first,
         'end_date': checkOutDate.toIso8601String().split('T').first,
         'daily_rate': dailyRate,
@@ -51,6 +58,7 @@ class PetBookingModel extends PetBooking {
       dailyRate: entity.dailyRate,
       status: entity.status,
       notes: entity.notes,
+      shopId: entity.shopId,
     );
   }
 }

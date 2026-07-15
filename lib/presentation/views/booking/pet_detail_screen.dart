@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/pet_types.dart';
 import '../../../domain/entities/booking_status.dart';
 import '../../../domain/entities/pet_booking.dart';
+import '../../controllers/shop_controller.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
@@ -110,12 +112,17 @@ class _DetailSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shopName = booking.shopId.isNotEmpty
+        ? Get.find<ShopController>().shopById(booking.shopId)?.name
+        : null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Stay Details', style: AppTypography.sectionHeader),
         const SizedBox(height: AppSpacing.md),
         const Divider(color: AppColors.mist),
+        if (shopName != null) _DetailRow(label: 'Shop', value: shopName),
         _DetailRow(label: 'Service', value: booking.serviceName),
         _DetailRow(
           label: 'Check In',

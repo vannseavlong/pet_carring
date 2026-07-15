@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/utils/pet_types.dart';
+import '../../../domain/entities/catalog_item.dart';
 import '../../../domain/entities/pet_booking.dart';
-import '../../../domain/entities/service.dart';
+import '../../../domain/entities/shop.dart';
 import '../../controllers/booking_controller.dart';
-import '../../controllers/service_controller.dart';
+import '../../routes/app_routes.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
@@ -14,9 +15,10 @@ import '../../theme/app_typography.dart';
 final _formPetTypes = PetTypes.all.where((t) => t.value != 'other').toList();
 
 class AddBookingScreen extends StatefulWidget {
-  final Service? initialService;
+  final Shop shop;
+  final CatalogItem item;
 
-  const AddBookingScreen({super.key, this.initialService});
+  const AddBookingScreen({super.key, required this.shop, required this.item});
 
   @override
   State<AddBookingScreen> createState() => _AddBookingScreenState();
@@ -25,22 +27,16 @@ class AddBookingScreen extends StatefulWidget {
 class _AddBookingScreenState extends State<AddBookingScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
-  final _rateCtrl = TextEditingController(text: '25.00');
+  late final _rateCtrl = TextEditingController(
+    text: widget.item.priceFrom.toStringAsFixed(2),
+  );
   final _notesCtrl = TextEditingController();
 
   String _petType = _formPetTypes.first.value;
-  Service? _selectedService;
   DateTime _checkIn = DateTime.now();
   DateTime _checkOut = DateTime.now().add(const Duration(days: 4));
 
   BookingController get _bookings => Get.find<BookingController>();
-  ServiceController get _services => Get.find<ServiceController>();
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedService = widget.initialService;
-  }
 
   @override
   void dispose() {
@@ -67,23 +63,25 @@ class _AddBookingScreenState extends State<AddBookingScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    final service = _selectedService;
-    if (service == null) return;
 
     final booking = PetBooking(
       id: '',
       petName: _nameCtrl.text.trim(),
       petType: _petType,
-      serviceId: service.serviceId,
-      serviceName: service.name,
+      serviceId: widget.item.itemId,
+      serviceName: widget.item.name,
       checkInDate: _checkIn,
       checkOutDate: _checkOut,
       dailyRate: double.parse(_rateCtrl.text),
       notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+      shopId: widget.shop.shopId,
     );
     try {
-      await _bookings.createBooking(booking);
-      Get.back();
+      final created = await _bookings.createBooking(booking);
+      Get.offNamed(
+        AppRoutes.bookingConfirmation,
+        arguments: (booking: created, shop: widget.shop),
+      );
     } catch (_) {
       Get.snackbar(
         'Booking failed',
@@ -129,37 +127,7 @@ class _AddBookingScreenState extends State<AddBookingScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _label('Service'),
-                Obx(() {
-                  final services = _services.services;
-                  if (_services.isLoading && services.isEmpty) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                      child: LinearProgressIndicator(color: AppColors.sageMid),
-                    );
-                  }
-                  if (_selectedService != null &&
-                      !services.contains(_selectedService)) {
-                    _selectedService = null;
-                  }
-                  return DropdownButtonFormField<Service>(
-                    initialValue: _selectedService,
-                    decoration: _inputDeco('Select a service'),
-                    items: services
-                        .map(
-                          (s) => DropdownMenuItem(
-                            value: s,
-                            child: Text(
-                              '${s.name} · \$${s.priceFrom.toStringAsFixed(0)}',
-                              style: AppTypography.bodyLarge,
-                            ),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (s) => setState(() => _selectedService = s),
-                    validator: (v) => v != null ? null : 'Select a service',
-                  );
-                }),
+                _ShopItemSummary(shop: widget.shop, item: widget.item),
                 const SizedBox(height: AppSpacing.lg),
 
                 _label('Pet Name'),
@@ -301,6 +269,54 @@ class _AddBookingScreenState extends State<AddBookingScreen> {
     ),
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
   );
+}
+
+class _ShopItemSummary extends StatelessWidget {
+  final Shop shop;
+  final CatalogItem item;
+  const _ShopItemSummary({required this.shop, required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.blushSoft,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.mist),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: const BoxDecoration(
+              color: AppColors.sageMid,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.storefront, color: Colors.white, size: 20),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(shop.name, style: AppTypography.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w700,
+                )),
+                Text(
+                  item.name,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.sageMid,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _BackButton extends StatelessWidget {

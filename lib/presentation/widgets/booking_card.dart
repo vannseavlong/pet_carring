@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../core/utils/pet_types.dart';
 import '../../domain/entities/pet_booking.dart';
+import '../controllers/shop_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
@@ -13,6 +15,10 @@ class BookingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shopName = booking.shopId.isNotEmpty
+        ? Get.find<ShopController>().shopById(booking.shopId)?.name
+        : null;
+
     return Card(
       margin: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -37,6 +43,13 @@ class BookingCard extends StatelessWidget {
                       booking.serviceName,
                       style: AppTypography.bodyMedium,
                     ),
+                    if (shopName != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        shopName,
+                        style: AppTypography.micro.copyWith(color: AppColors.sageMid),
+                      ),
+                    ],
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       '${booking.totalDays} days · \$${booking.totalCharge.toStringAsFixed(2)}',

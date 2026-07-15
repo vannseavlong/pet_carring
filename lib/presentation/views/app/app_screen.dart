@@ -3,10 +3,10 @@ import 'package:get/get.dart';
 import 'package:pet_carrying_app/presentation/theme/app_colors.dart';
 import 'package:pet_carrying_app/presentation/theme/app_typography.dart';
 import '../../controllers/navigation_controller.dart';
-import '../booking/add_booking_screen.dart';
+import '../../routes/app_routes.dart';
+import '../bookings/bookings_screen.dart';
+import '../browse/browse_screen.dart';
 import '../home/home_screen.dart';
-import '../stays/stays_screen.dart';
-import '../history/history_screen.dart';
 import '../profile/profile_screen.dart';
 
 class AppScreen extends StatelessWidget {
@@ -18,8 +18,8 @@ class AppScreen extends StatelessWidget {
 
     final screens = [
       const HomeScreen(),
-      const StaysScreen(),
-      const HistoryScreen(),
+      const BrowseScreen(),
+      const BookingsScreen(),
       const ProfileScreen(),
     ];
 
@@ -29,11 +29,11 @@ class AppScreen extends StatelessWidget {
         children: screens,
       ),
 
-      // 1. The amber + button
+      // 1. The amber + button — opens shop search from anywhere
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.to(() => const AddBookingScreen()),
+        onPressed: () => Get.toNamed(AppRoutes.search),
         shape: const CircleBorder(),
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.search),
       ),
 
       // 2. Docks the FAB to the center of the bottom bar
@@ -52,11 +52,10 @@ class AppScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _NavItem(icon: Icons.home_outlined, label: 'Home', index: 0, nav: nav),
-            _NavItem(icon: Icons.pets_outlined, label: 'Stays', index: 1, nav: nav),
+            _NavItem(icon: Icons.storefront_outlined, label: 'Browse', index: 1, nav: nav),
             const SizedBox(width: 48),
-            _NavItem(icon: Icons.history, label: 'History', index: 2, nav: nav),
+            _NavItem(icon: Icons.event_note_outlined, label: 'Bookings', index: 2, nav: nav),
             _NavItem(icon: Icons.person_outline, label: 'Profile', index: 3, nav: nav),
-            
           ],
         ),
       ),

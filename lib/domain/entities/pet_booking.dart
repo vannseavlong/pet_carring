@@ -12,6 +12,7 @@ class PetBooking extends Equatable {
   final double dailyRate;
   final String status;
   final String? notes;
+  final String shopId;
 
   const PetBooking({
     required this.id,
@@ -24,6 +25,7 @@ class PetBooking extends Equatable {
     required this.dailyRate,
     this.status = BookingStatus.pending,
     this.notes,
+    this.shopId = '',
   });
 
   int get totalDays {
@@ -44,6 +46,7 @@ class PetBooking extends Equatable {
     double? dailyRate,
     String? status,
     String? notes,
+    String? shopId,
   }) {
     return PetBooking(
       id: id ?? this.id,
@@ -56,6 +59,7 @@ class PetBooking extends Equatable {
       dailyRate: dailyRate ?? this.dailyRate,
       status: status ?? this.status,
       notes: notes ?? this.notes,
+      shopId: shopId ?? this.shopId,
     );
   }
 
@@ -71,5 +75,6 @@ class PetBooking extends Equatable {
     dailyRate,
     status,
     notes,
+    shopId,
   ];
 }

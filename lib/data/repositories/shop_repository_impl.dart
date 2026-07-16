@@ -20,4 +20,17 @@ class ShopRepositoryImpl implements ShopRepository {
       return _local.getCachedShops();
     }
   }
+
+  @override
+  Future<Shop> getShopById(String shopId) async {
+    try {
+      return await _remote.getShopById(shopId);
+    } on AppException {
+      final cached = await _local.getCachedShops();
+      for (final shop in cached) {
+        if (shop.shopId == shopId) return shop;
+      }
+      rethrow;
+    }
+  }
 }

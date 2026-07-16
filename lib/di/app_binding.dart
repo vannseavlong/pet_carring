@@ -20,6 +20,7 @@ import '../domain/usecases/add_booking_usecase.dart';
 import '../domain/usecases/get_bookings_usecase.dart';
 import '../domain/usecases/get_catalog_items_usecase.dart';
 import '../domain/usecases/get_current_user_usecase.dart';
+import '../domain/usecases/get_shop_by_id_usecase.dart';
 import '../domain/usecases/get_shops_usecase.dart';
 import '../domain/usecases/login_usecase.dart';
 import '../domain/usecases/login_with_google_token_usecase.dart';
@@ -65,6 +66,7 @@ class AppBinding extends Bindings {
       fenix: true,
     );
     Get.lazyPut(() => GetShopsUseCase(Get.find()), fenix: true);
+    Get.lazyPut(() => GetShopByIdUseCase(Get.find()), fenix: true);
 
     // Catalog items (shop-scoped services/products)
     Get.lazyPut<CatalogRemoteDataSource>(

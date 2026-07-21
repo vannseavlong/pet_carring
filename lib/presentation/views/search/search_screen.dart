@@ -92,8 +92,9 @@ class _SearchScreenState extends State<SearchScreen> {
         backgroundColor: AppColors.creamWarm,
         elevation: 0,
         titleSpacing: 0,
+        automaticallyImplyLeading: false,
         title: Padding(
-          padding: const EdgeInsets.only(right: AppSpacing.md),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Row(
             children: [
               Stack(

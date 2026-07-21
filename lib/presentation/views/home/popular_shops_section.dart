@@ -53,7 +53,7 @@ class PopularShopsSection extends StatelessWidget {
             );
           }
           return SizedBox(
-            height: 108,
+            height: ShopCard.railHeight,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: controller.shops.length,

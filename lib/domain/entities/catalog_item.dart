@@ -14,6 +14,7 @@ class CatalogItem extends Equatable {
   final double priceFrom;
   final String icon;
   final String color;
+  final String image;
   final String category;
 
   const CatalogItem({
@@ -25,6 +26,7 @@ class CatalogItem extends Equatable {
     required this.priceFrom,
     required this.icon,
     required this.color,
+    this.image = '',
     required this.category,
   });
 
@@ -38,6 +40,7 @@ class CatalogItem extends Equatable {
     priceFrom,
     icon,
     color,
+    image,
     category,
   ];
 }

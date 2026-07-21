@@ -6,6 +6,7 @@ import '../../routes/app_routes.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_typography.dart';
+import 'featured_products_section.dart';
 import 'home_header.dart';
 import 'popular_shops_section.dart';
 import 'status_card.dart';
@@ -54,6 +55,8 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 const PopularShopsSection(),
+                const SizedBox(height: AppSpacing.lg),
+                const FeaturedProductsSection(),
               ],
             ),
           );

@@ -6,6 +6,7 @@ import '../../models/catalog_item_model.dart';
 
 abstract interface class CatalogRemoteDataSource {
   Future<List<CatalogItemModel>> getCatalogItems(String shopId);
+  Future<List<CatalogItemModel>> getFeaturedItems({String? type, int? limit});
 }
 
 class CatalogRemoteDataSourceImpl implements CatalogRemoteDataSource {
@@ -18,6 +19,27 @@ class CatalogRemoteDataSourceImpl implements CatalogRemoteDataSource {
     try {
       final response = await _apiClient.dio.get(
         ApiEndpoints.shopCatalogItems(shopId),
+      );
+      final data = response.data['items'] as List<dynamic>;
+      return data
+          .map((e) => CatalogItemModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw NetworkException(
+        e.message ?? 'Network error',
+        statusCode: e.response?.statusCode,
+      );
+    }
+  }
+
+  @override
+  Future<List<CatalogItemModel>> getFeaturedItems({
+    String? type,
+    int? limit,
+  }) async {
+    try {
+      final response = await _apiClient.dio.get(
+        ApiEndpoints.catalogItems(type: type, limit: limit),
       );
       final data = response.data['items'] as List<dynamic>;
       return data

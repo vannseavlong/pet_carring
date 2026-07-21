@@ -20,4 +20,15 @@ class CatalogRepositoryImpl implements CatalogRepository {
       return _local.getCachedCatalogItems(shopId);
     }
   }
+
+  @override
+  Future<List<CatalogItem>> getFeaturedItems({String? type, int? limit}) async {
+    try {
+      final items = await _remote.getFeaturedItems(type: type, limit: limit);
+      await _local.cacheFeaturedItems(items);
+      return items;
+    } on AppException {
+      return _local.getCachedFeaturedItems(type: type, limit: limit);
+    }
+  }
 }

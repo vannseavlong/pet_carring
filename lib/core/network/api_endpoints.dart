@@ -14,4 +14,12 @@ abstract final class ApiEndpoints {
   static String shopById(String id) => '/user/shops/$id';
   static String shopCatalogItems(String shopId) =>
       '/user/shops/$shopId/catalog-items';
+
+  // Catalog items (cross-shop)
+  static String catalogItems({String? type, int? limit}) {
+    final params = <String, String>{'type': ?type, 'limit': ?limit?.toString()};
+    if (params.isEmpty) return '/user/catalog-items';
+    final query = params.entries.map((e) => '${e.key}=${e.value}').join('&');
+    return '/user/catalog-items?$query';
+  }
 }

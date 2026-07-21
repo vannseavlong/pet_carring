@@ -10,6 +10,7 @@ class CatalogItemModel extends CatalogItem {
     required super.priceFrom,
     required super.icon,
     required super.color,
+    super.image,
     required super.category,
   });
 
@@ -23,6 +24,7 @@ class CatalogItemModel extends CatalogItem {
       priceFrom: (json['price_from'] as num).toDouble(),
       icon: json['icon'] as String? ?? '',
       color: json['color'] as String? ?? '#E8F0EE',
+      image: json['image'] as String? ?? '',
       category: json['category'] as String? ?? '',
     );
   }

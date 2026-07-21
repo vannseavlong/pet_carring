@@ -266,7 +266,96 @@ class BookingsRepository {
 
 ---
 
-## 5. Commands quick reference
+## 5. Catalog Items — `/user/shops/:id/catalog-items` & `/user/catalog-items`
+
+Shop catalogs hold both bookable `service` items and purchasable `product`
+items.
+
+| Method | Endpoint | Auth | Body → Response |
+|--------|----------|------|------------------|
+| GET | `/user/shops/:id/catalog-items` | — | Items for one shop → `{ items: CatalogItemModel[] }` |
+| GET | `/user/catalog-items` | — | Cross-shop items (e.g. home-screen "Featured Products") → `{ items: CatalogItemModel[] }` |
+
+`/user/catalog-items` query params (all optional):
+- `type` — `service` or `product`
+- `limit` — positive int, caps the number of items returned
+
+`catalog item` object: `{ item_id, shop_id, item_type, name, description, price_from, icon, color, image, category, active, sort_order }`
+
+`image` is a URL string and may be empty (`""`) — render with a themed
+fallback (icon + tinted background) rather than leaving a blank space when
+empty or when the network image fails to load.
+
+```dart
+abstract final class CatalogItemType {
+  static const service = 'service';
+  static const product = 'product';
+}
+
+class CatalogItemModel {
+  final String itemId;
+  final String shopId;
+  final String itemType;
+  final String name;
+  final String description;
+  final double priceFrom;
+  final String icon;     // key into the app's local icon map
+  final String color;    // card background hex, e.g. "#D6EAE4"
+  final String image;    // product/service photo URL, may be ""
+  final String category;
+
+  const CatalogItemModel({
+    required this.itemId,
+    required this.shopId,
+    required this.itemType,
+    required this.name,
+    required this.description,
+    required this.priceFrom,
+    required this.icon,
+    required this.color,
+    this.image = '',
+    required this.category,
+  });
+
+  factory CatalogItemModel.fromJson(Map<String, dynamic> j) => CatalogItemModel(
+        itemId:      j['item_id'] as String,
+        shopId:      j['shop_id'] as String,
+        itemType:    j['item_type'] as String? ?? CatalogItemType.service,
+        name:        j['name'] as String,
+        description: j['description'] as String? ?? '',
+        priceFrom:   (j['price_from'] as num).toDouble(),
+        icon:        j['icon'] as String? ?? '',
+        color:       j['color'] as String? ?? '#E8F0EE',
+        image:       j['image'] as String? ?? '',
+        category:    j['category'] as String? ?? '',
+      );
+}
+```
+
+```dart
+class CatalogRepository {
+  // Shop-scoped (e.g. shop detail screen)
+  Future<List<CatalogItemModel>> getCatalogItems(String shopId) async {
+    final res = await apiClient.get('/user/shops/$shopId/catalog-items');
+    final list = res.data['items'] as List<dynamic>;
+    return list.map((j) => CatalogItemModel.fromJson(j as Map<String, dynamic>)).toList();
+  }
+
+  // Cross-shop (e.g. home-screen "Featured Products")
+  Future<List<CatalogItemModel>> getFeaturedItems({String? type, int? limit}) async {
+    final res = await apiClient.get('/user/catalog-items', params: {
+      if (type != null) 'type': type,
+      if (limit != null) 'limit': limit,
+    });
+    final list = res.data['items'] as List<dynamic>;
+    return list.map((j) => CatalogItemModel.fromJson(j as Map<String, dynamic>)).toList();
+  }
+}
+```
+
+---
+
+## 6. Commands quick reference
 
 ```bash
 # Seed services into the admin sheet (run once)

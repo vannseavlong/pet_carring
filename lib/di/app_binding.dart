@@ -20,6 +20,7 @@ import '../domain/usecases/add_booking_usecase.dart';
 import '../domain/usecases/get_bookings_usecase.dart';
 import '../domain/usecases/get_catalog_items_usecase.dart';
 import '../domain/usecases/get_current_user_usecase.dart';
+import '../domain/usecases/get_featured_catalog_items_usecase.dart';
 import '../domain/usecases/get_shop_by_id_usecase.dart';
 import '../domain/usecases/get_shops_usecase.dart';
 import '../domain/usecases/login_usecase.dart';
@@ -82,7 +83,14 @@ class AppBinding extends Bindings {
       fenix: true,
     );
     Get.lazyPut(() => GetCatalogItemsUseCase(Get.find()), fenix: true);
-    Get.lazyPut(() => ShopController(Get.find(), Get.find()), fenix: true);
+    Get.lazyPut(
+      () => GetFeaturedCatalogItemsUseCase(Get.find()),
+      fenix: true,
+    );
+    Get.lazyPut(
+      () => ShopController(Get.find(), Get.find(), Get.find()),
+      fenix: true,
+    );
 
     // Bookings
     Get.lazyPut<BookingRemoteDataSource>(

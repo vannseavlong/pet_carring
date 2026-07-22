@@ -18,17 +18,10 @@ class BrowseScreen extends StatefulWidget {
 }
 
 class _BrowseScreenState extends State<BrowseScreen> {
-  final _searchCtrl = TextEditingController();
   late String? _category = widget.initialCategory;
 
   ShopController get _shops => Get.find<ShopController>();
   CategoryController get _categories => Get.find<CategoryController>();
-
-  @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,20 +40,26 @@ class _BrowseScreenState extends State<BrowseScreen> {
                 horizontal: AppSpacing.md,
                 vertical: AppSpacing.sm,
               ),
-              child: TextField(
-                controller: _searchCtrl,
-                onChanged: (_) => setState(() {}),
-                decoration: InputDecoration(
-                  hintText: 'Search shops...',
-                  hintStyle: AppTypography.bodyLarge.copyWith(color: AppColors.mist),
-                  prefixIcon: const Icon(Icons.search, color: AppColors.sageMid),
-                  filled: true,
-                  fillColor: AppColors.blushSoft,
-                  border: OutlineInputBorder(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () => Get.toNamed(AppRoutes.search),
+                child: Container(
+                  height: 48,
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.blushSoft,
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
                   ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.search, color: AppColors.sageMid),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        'Search shops...',
+                        style: AppTypography.bodyLarge.copyWith(color: AppColors.mist),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -98,10 +97,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                     child: CircularProgressIndicator(color: AppColors.sageMid),
                   );
                 }
-                final results = _shops.search(
-                  query: _searchCtrl.text,
-                  categoryId: _category,
-                );
+                final results = _shops.search(categoryId: _category);
                 if (results.isEmpty) {
                   return Center(
                     child: Text(

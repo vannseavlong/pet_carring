@@ -10,7 +10,7 @@ class ShopModel extends Shop {
     required super.contactPhone,
     required super.hours,
     required super.status,
-    super.category,
+    super.categoryId,
   });
 
   factory ShopModel.fromJson(Map<String, dynamic> json) {
@@ -23,9 +23,7 @@ class ShopModel extends Shop {
       contactPhone: json['contact_phone'] as String? ?? '',
       hours: json['hours'] as String? ?? '',
       status: json['status'] as String? ?? 'active',
-      // Not on the backend `shops` schema yet — falls back to the shop's
-      // primary catalog category if/when the API starts sending one.
-      category: json['category'] as String? ?? '',
+      categoryId: json['category_id'] as String? ?? '',
     );
   }
 }

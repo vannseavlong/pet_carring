@@ -4,12 +4,16 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:pet_carrying_app/domain/entities/catalog_item.dart';
+import 'package:pet_carrying_app/domain/entities/category.dart';
 import 'package:pet_carrying_app/domain/entities/shop.dart';
 import 'package:pet_carrying_app/domain/repositories/catalog_repository.dart';
+import 'package:pet_carrying_app/domain/repositories/category_repository.dart';
 import 'package:pet_carrying_app/domain/repositories/shop_repository.dart';
 import 'package:pet_carrying_app/domain/usecases/get_catalog_items_usecase.dart';
+import 'package:pet_carrying_app/domain/usecases/get_categories_usecase.dart';
 import 'package:pet_carrying_app/domain/usecases/get_featured_catalog_items_usecase.dart';
 import 'package:pet_carrying_app/domain/usecases/get_shops_usecase.dart';
+import 'package:pet_carrying_app/presentation/controllers/category_controller.dart';
 import 'package:pet_carrying_app/presentation/controllers/shop_controller.dart';
 import 'package:pet_carrying_app/presentation/views/search/search_screen.dart';
 
@@ -25,7 +29,7 @@ class _FakeShopRepository implements ShopRepository {
           contactPhone: '',
           hours: '',
           status: 'active',
-          category: 'grooming',
+          categoryId: 'grooming',
         ),
         Shop(
           shopId: 's2',
@@ -36,7 +40,7 @@ class _FakeShopRepository implements ShopRepository {
           contactPhone: '',
           hours: '',
           status: 'active',
-          category: 'boarding',
+          categoryId: 'boarding',
         ),
       ];
 
@@ -50,6 +54,14 @@ class _FakeCatalogRepository implements CatalogRepository {
 
   @override
   Future<List<CatalogItem>> getFeaturedItems({String? type, int? limit}) async => const [];
+}
+
+class _FakeCategoryRepository implements CategoryRepository {
+  @override
+  Future<List<Category>> getCategories() async => const [
+        Category(categoryId: 'grooming', name: 'Grooming', icon: '🛁', sortOrder: 1),
+        Category(categoryId: 'boarding', name: 'Boarding', icon: '🏡', sortOrder: 2),
+      ];
 }
 
 Widget _wrap(Widget child) => GetMaterialApp(home: child);
@@ -66,6 +78,9 @@ void main() {
         GetCatalogItemsUseCase(catalogRepo),
         GetFeaturedCatalogItemsUseCase(catalogRepo),
       ),
+    );
+    Get.put<CategoryController>(
+      CategoryController(GetCategoriesUseCase(_FakeCategoryRepository())),
     );
   });
 

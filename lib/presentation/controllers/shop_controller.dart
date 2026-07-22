@@ -82,12 +82,13 @@ class ShopController extends GetxController {
     return null;
   }
 
-  List<Shop> search({String query = '', String? category}) {
+  List<Shop> search({String query = '', String? categoryId}) {
     final normalized = query.trim().toLowerCase();
     return shops.where((s) {
       final matchesQuery =
           normalized.isEmpty || s.name.toLowerCase().contains(normalized);
-      final matchesCategory = category == null || s.category == category;
+      final matchesCategory =
+          categoryId == null || s.categoryId == categoryId;
       return matchesQuery && matchesCategory;
     }).toList();
   }

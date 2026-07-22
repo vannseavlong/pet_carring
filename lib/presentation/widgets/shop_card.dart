@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../core/utils/shop_categories.dart';
+import 'package:get/get.dart';
 import '../../domain/entities/shop.dart';
+import '../controllers/category_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
@@ -28,9 +29,6 @@ class ShopCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categoryLabel = shop.category.isNotEmpty
-        ? ShopCategories.labelFor(shop.category)
-        : null;
     final isRail = width != null;
 
     return Container(
@@ -87,26 +85,32 @@ class ShopCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                if (!isRail && categoryLabel != null) ...[
-                  const SizedBox(height: AppSpacing.xs),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.sageMid.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: Text(
-                      categoryLabel,
-                      style: AppTypography.micro.copyWith(
-                        color: AppColors.sageDeep,
-                        fontWeight: FontWeight.w600,
+                if (!isRail && shop.categoryId.isNotEmpty)
+                  Obx(() {
+                    final label = Get.find<CategoryController>().labelFor(
+                      shop.categoryId,
+                    );
+                    return Padding(
+                      padding: const EdgeInsets.only(top: AppSpacing.xs),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.sageMid.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: Text(
+                          label,
+                          style: AppTypography.micro.copyWith(
+                            color: AppColors.sageDeep,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ],
+                    );
+                  }),
               ],
             ),
           ),

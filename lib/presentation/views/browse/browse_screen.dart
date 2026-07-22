@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/utils/shop_categories.dart';
+import '../../controllers/category_controller.dart';
 import '../../controllers/shop_controller.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_colors.dart';
@@ -22,6 +22,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
   late String? _category = widget.initialCategory;
 
   ShopController get _shops => Get.find<ShopController>();
+  CategoryController get _categories => Get.find<CategoryController>();
 
   @override
   void dispose() {
@@ -65,26 +66,29 @@ class _BrowseScreenState extends State<BrowseScreen> {
             ),
             SizedBox(
               height: 40,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                children: [
-                  _CategoryChip(
-                    label: 'All',
-                    selected: _category == null,
-                    onTap: () => setState(() => _category = null),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  for (final category in ShopCategories.all) ...[
+              child: Obx(() {
+                final categories = _categories.categories;
+                return ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  children: [
                     _CategoryChip(
-                      label: '${category.emoji} ${category.label}',
-                      selected: _category == category.value,
-                      onTap: () => setState(() => _category = category.value),
+                      label: 'All',
+                      selected: _category == null,
+                      onTap: () => setState(() => _category = null),
                     ),
                     const SizedBox(width: AppSpacing.sm),
+                    for (final category in categories) ...[
+                      _CategoryChip(
+                        label: '${category.icon} ${category.name}',
+                        selected: _category == category.categoryId,
+                        onTap: () => setState(() => _category = category.categoryId),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                    ],
                   ],
-                ],
-              ),
+                );
+              }),
             ),
             const SizedBox(height: AppSpacing.sm),
             Expanded(
@@ -96,7 +100,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                 }
                 final results = _shops.search(
                   query: _searchCtrl.text,
-                  category: _category,
+                  categoryId: _category,
                 );
                 if (results.isEmpty) {
                   return Center(

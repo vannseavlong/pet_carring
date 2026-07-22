@@ -9,7 +9,7 @@ class Shop extends Equatable {
   final String contactPhone;
   final String hours;
   final String status;
-  final String category;
+  final String categoryId;
 
   const Shop({
     required this.shopId,
@@ -20,7 +20,7 @@ class Shop extends Equatable {
     required this.contactPhone,
     required this.hours,
     required this.status,
-    this.category = '',
+    this.categoryId = '',
   });
 
   @override
@@ -33,6 +33,6 @@ class Shop extends Equatable {
     contactPhone,
     hours,
     status,
-    category,
+    categoryId,
   ];
 }

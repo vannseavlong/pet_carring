@@ -17,7 +17,7 @@ class ShopLocalDataSourceImpl implements ShopLocalDataSource {
       contactPhone: '555-0101',
       hours: 'Mon–Sat 9am–6pm',
       status: 'active',
-      category: 'grooming',
+      categoryId: 'cat_grooming',
     ),
     const ShopModel(
       shopId: 'shop_cozy_paws',
@@ -28,7 +28,7 @@ class ShopLocalDataSourceImpl implements ShopLocalDataSource {
       contactPhone: '555-0102',
       hours: 'Open 24/7',
       status: 'active',
-      category: 'boarding',
+      categoryId: 'cat_boarding',
     ),
     const ShopModel(
       shopId: 'shop_wagging_tails',
@@ -39,7 +39,7 @@ class ShopLocalDataSourceImpl implements ShopLocalDataSource {
       contactPhone: '555-0103',
       hours: 'Mon–Fri 7am–7pm',
       status: 'active',
-      category: 'daycare',
+      categoryId: 'cat_daycare',
     ),
     const ShopModel(
       shopId: 'shop_pawmart',
@@ -50,7 +50,7 @@ class ShopLocalDataSourceImpl implements ShopLocalDataSource {
       contactPhone: '555-0104',
       hours: 'Daily 8am–9pm',
       status: 'active',
-      category: 'pet_shop',
+      categoryId: 'cat_pet_shop',
     ),
   ];
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
 import '../../../core/utils/recent_search_store.dart';
-import '../../../core/utils/shop_categories.dart';
+import '../../controllers/category_controller.dart';
 import '../../controllers/shop_controller.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_colors.dart';
@@ -190,7 +190,7 @@ class _SearchScreenState extends State<SearchScreen> {
             );
           }
 
-          final results = _shops.search(query: query, category: _category);
+          final results = _shops.search(query: query, categoryId: _category);
           if (results.isEmpty) {
             return _NoResultsState(query: query, category: _category);
           }
@@ -270,22 +270,25 @@ class _EmptySearchState extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         Text('Browse by category', style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(height: AppSpacing.sm),
-        GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
-          crossAxisSpacing: AppSpacing.sm,
-          mainAxisSpacing: AppSpacing.sm,
-          childAspectRatio: 2.4,
-          children: [
-            for (final category in ShopCategories.all)
-              _CategoryTile(
-                emoji: category.emoji,
-                label: category.label,
-                onTap: () => onCategoryTap(category.value),
-              ),
-          ],
-        ),
+        Obx(() {
+          final categories = Get.find<CategoryController>().categories;
+          return GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            crossAxisSpacing: AppSpacing.sm,
+            mainAxisSpacing: AppSpacing.sm,
+            childAspectRatio: 2.4,
+            children: [
+              for (final category in categories)
+                _CategoryTile(
+                  emoji: category.icon,
+                  label: category.name,
+                  onTap: () => onCategoryTap(category.categoryId),
+                ),
+            ],
+          );
+        }),
       ],
     );
   }
@@ -376,7 +379,7 @@ class _NoResultsState extends StatelessWidget {
   Widget build(BuildContext context) {
     final label = query.isNotEmpty
         ? '"$query"'
-        : ShopCategories.labelFor(category ?? '');
+        : Get.find<CategoryController>().labelFor(category ?? '');
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -454,18 +457,21 @@ class _FilterSheet extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [
-                for (final category in ShopCategories.all)
-                  _FilterChip(
-                    label: '${category.emoji} ${category.label}',
-                    selected: selectedCategory == category.value,
-                    onTap: () => Navigator.of(context).pop(category.value),
-                  ),
-              ],
-            ),
+            Obx(() {
+              final categories = Get.find<CategoryController>().categories;
+              return Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  for (final category in categories)
+                    _FilterChip(
+                      label: '${category.icon} ${category.name}',
+                      selected: selectedCategory == category.categoryId,
+                      onTap: () => Navigator.of(context).pop(category.categoryId),
+                    ),
+                ],
+              );
+            }),
           ],
         ),
       ),

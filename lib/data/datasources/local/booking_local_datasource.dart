@@ -36,8 +36,7 @@ class BookingLocalDataSourceImpl implements BookingLocalDataSource {
   ];
 
   @override
-  Future<List<PetBookingModel>> getCachedBookings() async =>
-      List.unmodifiable(_cache);
+  Future<List<PetBookingModel>> getCachedBookings() async => List.of(_cache);
 
   @override
   Future<void> cacheBookings(List<PetBookingModel> bookings) async {

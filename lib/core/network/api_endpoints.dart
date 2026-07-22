@@ -22,4 +22,7 @@ abstract final class ApiEndpoints {
     final query = params.entries.map((e) => '${e.key}=${e.value}').join('&');
     return '/user/catalog-items?$query';
   }
+
+  // Categories
+  static const String categories = '/user/categories';
 }

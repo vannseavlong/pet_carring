@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/utils/shop_categories.dart';
 import '../../controllers/booking_controller.dart';
+import '../../controllers/category_controller.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
@@ -104,34 +104,38 @@ class _CategoryChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<CategoryController>();
     return SizedBox(
       height: 40,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: ShopCategories.all.length,
-        separatorBuilder: (context, index) => const SizedBox(width: AppSpacing.sm),
-        itemBuilder: (context, index) {
-          final category = ShopCategories.all[index];
-          return GestureDetector(
-            onTap: () => onSelect(category.value),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: AppColors.blushSoft,
-                borderRadius: BorderRadius.circular(100),
-              ),
-              child: Text(
-                '${category.emoji} ${category.label}',
-                style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.ink,
-                  fontWeight: FontWeight.w600,
+      child: Obx(() {
+        final categories = controller.categories;
+        return ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: categories.length,
+          separatorBuilder: (context, index) => const SizedBox(width: AppSpacing.sm),
+          itemBuilder: (context, index) {
+            final category = categories[index];
+            return GestureDetector(
+              onTap: () => onSelect(category.categoryId),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.blushSoft,
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: Text(
+                  '${category.icon} ${category.name}',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.ink,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-            ),
-          );
-        },
-      ),
+            );
+          },
+        );
+      }),
     );
   }
 }

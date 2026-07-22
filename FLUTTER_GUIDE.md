@@ -76,7 +76,7 @@ class ServiceModel {
   final double priceFrom;
   final String icon;     // key into the app's local icon map
   final String color;    // card background hex, e.g. "#D6EAE4"
-  final String category;
+  final String categoryId;
 
   const ServiceModel({
     required this.serviceId,
@@ -85,7 +85,7 @@ class ServiceModel {
     required this.priceFrom,
     required this.icon,
     required this.color,
-    required this.category,
+    required this.categoryId,
   });
 
   factory ServiceModel.fromJson(Map<String, dynamic> j) => ServiceModel(
@@ -95,7 +95,7 @@ class ServiceModel {
         priceFrom:   (j['price_from'] as num).toDouble(),
         icon:        j['icon'] as String,
         color:       j['color'] as String,
-        category:    j['category'] as String,
+        categoryId:  j['category_id'] as String,
       );
 }
 ```
@@ -280,7 +280,7 @@ items.
 - `type` — `service` or `product`
 - `limit` — positive int, caps the number of items returned
 
-`catalog item` object: `{ item_id, shop_id, item_type, name, description, price_from, icon, color, image, category, active, sort_order }`
+`catalog item` object: `{ item_id, shop_id, item_type, name, description, price_from, icon, color, image, category_id, active, sort_order }`
 
 `image` is a URL string and may be empty (`""`) — render with a themed
 fallback (icon + tinted background) rather than leaving a blank space when
@@ -302,7 +302,7 @@ class CatalogItemModel {
   final String icon;     // key into the app's local icon map
   final String color;    // card background hex, e.g. "#D6EAE4"
   final String image;    // product/service photo URL, may be ""
-  final String category;
+  final String categoryId;
 
   const CatalogItemModel({
     required this.itemId,
@@ -314,7 +314,7 @@ class CatalogItemModel {
     required this.icon,
     required this.color,
     this.image = '',
-    required this.category,
+    required this.categoryId,
   });
 
   factory CatalogItemModel.fromJson(Map<String, dynamic> j) => CatalogItemModel(
@@ -327,7 +327,40 @@ class CatalogItemModel {
         icon:        j['icon'] as String? ?? '',
         color:       j['color'] as String? ?? '#E8F0EE',
         image:       j['image'] as String? ?? '',
-        category:    j['category'] as String? ?? '',
+        categoryId:  j['category_id'] as String? ?? '',
+      );
+}
+```
+
+---
+
+## 5a. Categories — `GET /user/categories`
+
+Public, no auth. The shared taxonomy `category_id` on `ServiceModel`/`CatalogItemModel`/shops
+points into. Only `active: true` categories are returned, sorted by `sort_order` ascending —
+see `ADMIN_API.md` § 8 for the admin-managed CRUD side. Fetch once and resolve ids to display
+names/icons client-side (e.g. for home-screen category chips) rather than looking up one at a
+time.
+
+```dart
+class CategoryModel {
+  final String categoryId;
+  final String name;
+  final String icon;
+  final int sortOrder;
+
+  const CategoryModel({
+    required this.categoryId,
+    required this.name,
+    required this.icon,
+    required this.sortOrder,
+  });
+
+  factory CategoryModel.fromJson(Map<String, dynamic> j) => CategoryModel(
+        categoryId: j['category_id'] as String,
+        name:       j['name'] as String,
+        icon:       j['icon'] as String? ?? '',
+        sortOrder:  (j['sort_order'] as num?)?.toInt() ?? 0,
       );
 }
 ```

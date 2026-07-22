@@ -3,22 +3,27 @@ import '../core/network/api_client.dart';
 import '../core/services/auth_deep_link_service.dart';
 import '../data/datasources/local/booking_local_datasource.dart';
 import '../data/datasources/local/catalog_local_datasource.dart';
+import '../data/datasources/local/category_local_datasource.dart';
 import '../data/datasources/local/shop_local_datasource.dart';
 import '../data/datasources/remote/auth_remote_datasource.dart';
 import '../data/datasources/remote/booking_remote_datasource.dart';
 import '../data/datasources/remote/catalog_remote_datasource.dart';
+import '../data/datasources/remote/category_remote_datasource.dart';
 import '../data/datasources/remote/shop_remote_datasource.dart';
 import '../data/repositories/auth_repository_impl.dart';
 import '../data/repositories/booking_repository_impl.dart';
 import '../data/repositories/catalog_repository_impl.dart';
+import '../data/repositories/category_repository_impl.dart';
 import '../data/repositories/shop_repository_impl.dart';
 import '../domain/repositories/auth_repository.dart';
 import '../domain/repositories/booking_repository.dart';
 import '../domain/repositories/catalog_repository.dart';
+import '../domain/repositories/category_repository.dart';
 import '../domain/repositories/shop_repository.dart';
 import '../domain/usecases/add_booking_usecase.dart';
 import '../domain/usecases/get_bookings_usecase.dart';
 import '../domain/usecases/get_catalog_items_usecase.dart';
+import '../domain/usecases/get_categories_usecase.dart';
 import '../domain/usecases/get_current_user_usecase.dart';
 import '../domain/usecases/get_featured_catalog_items_usecase.dart';
 import '../domain/usecases/get_shop_by_id_usecase.dart';
@@ -29,6 +34,7 @@ import '../domain/usecases/logout_usecase.dart';
 import '../domain/usecases/register_usecase.dart';
 import '../presentation/controllers/auth_controller.dart';
 import '../presentation/controllers/booking_controller.dart';
+import '../presentation/controllers/category_controller.dart';
 import '../presentation/controllers/navigation_controller.dart';
 import '../presentation/controllers/shop_controller.dart';
 
@@ -91,6 +97,22 @@ class AppBinding extends Bindings {
       () => ShopController(Get.find(), Get.find(), Get.find()),
       fenix: true,
     );
+
+    // Categories
+    Get.lazyPut<CategoryRemoteDataSource>(
+      () => CategoryRemoteDataSourceImpl(Get.find()),
+      fenix: true,
+    );
+    Get.lazyPut<CategoryLocalDataSource>(
+      () => CategoryLocalDataSourceImpl(),
+      fenix: true,
+    );
+    Get.lazyPut<CategoryRepository>(
+      () => CategoryRepositoryImpl(Get.find(), Get.find()),
+      fenix: true,
+    );
+    Get.lazyPut(() => GetCategoriesUseCase(Get.find()), fenix: true);
+    Get.lazyPut(() => CategoryController(Get.find()), fenix: true);
 
     // Bookings
     Get.lazyPut<BookingRemoteDataSource>(

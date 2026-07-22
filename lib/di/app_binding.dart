@@ -1,10 +1,6 @@
 import 'package:get/get.dart';
 import '../core/network/api_client.dart';
 import '../core/services/auth_deep_link_service.dart';
-import '../data/datasources/local/booking_local_datasource.dart';
-import '../data/datasources/local/catalog_local_datasource.dart';
-import '../data/datasources/local/category_local_datasource.dart';
-import '../data/datasources/local/shop_local_datasource.dart';
 import '../data/datasources/remote/auth_remote_datasource.dart';
 import '../data/datasources/remote/booking_remote_datasource.dart';
 import '../data/datasources/remote/catalog_remote_datasource.dart';
@@ -64,12 +60,8 @@ class AppBinding extends Bindings {
       () => ShopRemoteDataSourceImpl(Get.find()),
       fenix: true,
     );
-    Get.lazyPut<ShopLocalDataSource>(
-      () => ShopLocalDataSourceImpl(),
-      fenix: true,
-    );
     Get.lazyPut<ShopRepository>(
-      () => ShopRepositoryImpl(Get.find(), Get.find()),
+      () => ShopRepositoryImpl(Get.find()),
       fenix: true,
     );
     Get.lazyPut(() => GetShopsUseCase(Get.find()), fenix: true);
@@ -80,12 +72,8 @@ class AppBinding extends Bindings {
       () => CatalogRemoteDataSourceImpl(Get.find()),
       fenix: true,
     );
-    Get.lazyPut<CatalogLocalDataSource>(
-      () => CatalogLocalDataSourceImpl(),
-      fenix: true,
-    );
     Get.lazyPut<CatalogRepository>(
-      () => CatalogRepositoryImpl(Get.find(), Get.find()),
+      () => CatalogRepositoryImpl(Get.find()),
       fenix: true,
     );
     Get.lazyPut(() => GetCatalogItemsUseCase(Get.find()), fenix: true);
@@ -103,12 +91,8 @@ class AppBinding extends Bindings {
       () => CategoryRemoteDataSourceImpl(Get.find()),
       fenix: true,
     );
-    Get.lazyPut<CategoryLocalDataSource>(
-      () => CategoryLocalDataSourceImpl(),
-      fenix: true,
-    );
     Get.lazyPut<CategoryRepository>(
-      () => CategoryRepositoryImpl(Get.find(), Get.find()),
+      () => CategoryRepositoryImpl(Get.find()),
       fenix: true,
     );
     Get.lazyPut(() => GetCategoriesUseCase(Get.find()), fenix: true);
@@ -119,12 +103,8 @@ class AppBinding extends Bindings {
       () => BookingRemoteDataSourceImpl(Get.find()),
       fenix: true,
     );
-    Get.lazyPut<BookingLocalDataSource>(
-      () => BookingLocalDataSourceImpl(),
-      fenix: true,
-    );
     Get.lazyPut<BookingRepository>(
-      () => BookingRepositoryImpl(Get.find(), Get.find()),
+      () => BookingRepositoryImpl(Get.find()),
       fenix: true,
     );
     Get.lazyPut(() => GetBookingsUseCase(Get.find()), fenix: true);

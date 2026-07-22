@@ -5,6 +5,7 @@ class Shop extends Equatable {
   final String name;
   final String description;
   final String logo;
+  final String banner;
   final String contactEmail;
   final String contactPhone;
   final String hours;
@@ -16,6 +17,7 @@ class Shop extends Equatable {
     required this.name,
     required this.description,
     required this.logo,
+    this.banner = '',
     required this.contactEmail,
     required this.contactPhone,
     required this.hours,
@@ -29,6 +31,7 @@ class Shop extends Equatable {
     name,
     description,
     logo,
+    banner,
     contactEmail,
     contactPhone,
     hours,

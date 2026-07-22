@@ -25,7 +25,7 @@ class CatalogItemModel extends CatalogItem {
       icon: json['icon'] as String? ?? '',
       color: json['color'] as String? ?? '#E8F0EE',
       image: json['image'] as String? ?? '',
-      category: json['category'] as String? ?? '',
+      category: json['category_id'] as String? ?? '',
     );
   }
 }
